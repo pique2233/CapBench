@@ -4,26 +4,102 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 type TaskLayer = "base" | "control" | "threat";
-type ScenarioId =
-  | "base_safe_allow_pwd"
-  | "control_safe_constrain_touch"
-  | "threat_manual_rule_command_substitution_deny";
+type TaskComplexity = "low" | "medium" | "high";
+type TaskVariant = "benign" | "ambiguous" | "adversarial_pressure";
+type ExecutionKind = "allow" | "constrain" | "manual_rule_deny" | "safe_agent_deny";
 
-type TaskSpec = {
-  id: string;
-  layer: TaskLayer;
-  title: string;
-  description: string;
-  scenario: ScenarioId;
+type WorkspaceFile = {
+  path: string;
+  content: string;
+  executable?: boolean;
+};
+
+type FileContainsAssertion = {
+  path: string;
+  contains: string[];
+};
+
+type TaskAssertions = {
+  outputContains?: string[];
+  fileExists?: string[];
+  fileContains?: FileContainsAssertion[];
+  attenuationSeen?: boolean;
+  manualRuleDeny?: boolean;
+  safeAgentCalls?: number;
+  observedStatus?: string;
+  observedDecision?: string;
+  stageExcludes?: string[];
+};
+
+type ExecutionDefinition = {
+  kind: ExecutionKind;
+  command: string;
   expectedOutcome: "completed" | "blocked";
   expectedStages: string[];
+  workspaceFiles?: WorkspaceFile[];
+  allowedWritePaths?: string[];
+  assertions: TaskAssertions;
+};
+
+type CoreTaskDefinition = {
+  coreTaskId: string;
+  layer: TaskLayer;
+  subcategory: string;
+  complexity: TaskComplexity;
+  title: string;
+  description: string;
+  instruction: string;
+  execution: ExecutionDefinition;
+};
+
+type VariantOverlay = {
+  variant: TaskVariant;
+  titleSuffix: string;
+  description: string;
+  workspaceFilesAppend?: WorkspaceFile[];
+  executionOverride?: Partial<ExecutionDefinition>;
+};
+
+type CoreTaskRecord = {
+  coreTaskId: string;
+  layer: TaskLayer;
+  subcategory: string;
+  complexity: TaskComplexity;
+  title: string;
+  description: string;
+  taskPath: string;
+  instructionPath: string;
+  variants: TaskVariant[];
+};
+
+type InstanceSpec = {
+  id: string;
+  coreTaskId: string;
+  variant: TaskVariant;
+  layer: TaskLayer;
+  subcategory: string;
+  complexity: TaskComplexity;
+  title: string;
+  description: string;
+  taskPath: string;
+  instructionPath: string;
+  kind: ExecutionKind;
+  command: string;
+  expectedOutcome: "completed" | "blocked";
+  expectedStages: string[];
+  workspaceFiles: WorkspaceFile[];
+  allowedWritePaths: string[];
+  assertions: TaskAssertions;
 };
 
 type TaskResult = {
   id: string;
+  coreTaskId: string;
+  variant: TaskVariant;
   layer: TaskLayer;
+  subcategory: string;
   title: string;
-  scenario: ScenarioId;
+  kind: ExecutionKind;
   pass: boolean;
   expectedOutcome: "completed" | "blocked";
   observedStatus: string | null;
@@ -44,6 +120,12 @@ type SuiteMetrics = {
   passRate: number;
   averageStageCoverage: number;
   auditCoverageRate: number;
+  baseSuccessRate: number;
+  controlSuccessRate: number;
+  threatSuccessRate: number;
+  benignPassRate: number;
+  ambiguousPassRate: number;
+  adversarialPassRate: number;
   blockedThreatRate: number;
   controlEnforcementRate: number;
 };
@@ -57,7 +139,9 @@ type CommandResult = {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const BENCH_ROOT = __dirname;
-const TASKS_DIR = path.join(BENCH_ROOT, "tasks");
+const TASKS_ROOT = path.join(BENCH_ROOT, "tasks");
+const REGISTRY_DIR = path.join(BENCH_ROOT, "registry");
+const RUNSETS_DIR = path.join(REGISTRY_DIR, "runsets");
 const RUNS_DIR = path.join(BENCH_ROOT, "runs");
 const TARGET_ROOT = path.resolve(
   process.env.CAPCLAW_TARGET_ROOT ?? path.join(BENCH_ROOT, "..", "CapClaw"),
@@ -80,20 +164,145 @@ const NODE22_BIN = path.join(
   "node",
 );
 const NODE22_BIN_DIR = path.dirname(NODE22_BIN);
+const DEFAULT_RUNSET = process.env.CAPBENCH_RUNSET ?? "smoke";
 
 function round(value: number): number {
   return Math.round(value * 1000) / 1000;
 }
 
-async function loadTasks(): Promise<TaskSpec[]> {
-  const entries = await fs.readdir(TASKS_DIR);
-  const taskFiles = entries.filter((entry) => entry.endsWith(".json")).sort();
-  return Promise.all(
-    taskFiles.map(async (entry) => {
-      const filePath = path.join(TASKS_DIR, entry);
-      return JSON.parse(await fs.readFile(filePath, "utf8")) as TaskSpec;
+async function readJson<T>(filePath: string): Promise<T> {
+  return JSON.parse(await fs.readFile(filePath, "utf8")) as T;
+}
+
+function toJsonl(records: object[]): string {
+  return `${records.map((record) => JSON.stringify(record)).join("\n")}\n`;
+}
+
+async function collectTaskFiles(dir: string): Promise<string[]> {
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  const files = await Promise.all(
+    entries.map(async (entry) => {
+      const entryPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        return await collectTaskFiles(entryPath);
+      }
+      return [entryPath];
     }),
   );
+  return files.flat();
+}
+
+function mergeAssertions(
+  base: TaskAssertions,
+  override?: TaskAssertions,
+): TaskAssertions {
+  return {
+    ...base,
+    ...override,
+  };
+}
+
+function buildInstance(
+  taskFile: string,
+  task: CoreTaskDefinition,
+  variant: VariantOverlay,
+): InstanceSpec {
+  const baseExecution = task.execution;
+  const override = variant.executionOverride ?? {};
+  const workspaceFiles = [
+    ...(baseExecution.workspaceFiles ?? []),
+    ...(variant.workspaceFilesAppend ?? []),
+  ];
+  const assertions = mergeAssertions(baseExecution.assertions, override.assertions);
+
+  return {
+    id: `${task.coreTaskId}__${variant.variant}`,
+    coreTaskId: task.coreTaskId,
+    variant: variant.variant,
+    layer: task.layer,
+    subcategory: task.subcategory,
+    complexity: task.complexity,
+    title: `${task.title} - ${variant.titleSuffix}`,
+    description: variant.description,
+    taskPath: path.relative(BENCH_ROOT, path.dirname(taskFile)),
+    instructionPath: path.relative(BENCH_ROOT, path.join(path.dirname(taskFile), "instruction.md")),
+    kind: override.kind ?? baseExecution.kind,
+    command: override.command ?? baseExecution.command,
+    expectedOutcome: override.expectedOutcome ?? baseExecution.expectedOutcome,
+    expectedStages: override.expectedStages ?? baseExecution.expectedStages,
+    workspaceFiles,
+    allowedWritePaths: override.allowedWritePaths ?? baseExecution.allowedWritePaths ?? [],
+    assertions,
+  };
+}
+
+function compareVariants(left: TaskVariant, right: TaskVariant): number {
+  const order: TaskVariant[] = ["benign", "ambiguous", "adversarial_pressure"];
+  return order.indexOf(left) - order.indexOf(right);
+}
+
+async function generateRegistry(): Promise<{
+  coreTasks: CoreTaskRecord[];
+  instances: InstanceSpec[];
+}> {
+  await fs.mkdir(REGISTRY_DIR, { recursive: true });
+  await fs.mkdir(RUNSETS_DIR, { recursive: true });
+
+  const taskFiles = (await collectTaskFiles(TASKS_ROOT))
+    .filter((filePath) => path.basename(filePath) === "task.json")
+    .sort();
+
+  const coreTasks: CoreTaskRecord[] = [];
+  const instances: InstanceSpec[] = [];
+
+  for (const taskFile of taskFiles) {
+    const taskDir = path.dirname(taskFile);
+    const task = await readJson<CoreTaskDefinition>(taskFile);
+    const variantsDir = path.join(taskDir, "variants");
+    const variantFiles = (await fs.readdir(variantsDir))
+      .filter((entry) => entry.endsWith(".json"))
+      .sort();
+    const variantOverlays = await Promise.all(
+      variantFiles.map(async (entry) => await readJson<VariantOverlay>(path.join(variantsDir, entry))),
+    );
+    variantOverlays.sort((left, right) => compareVariants(left.variant, right.variant));
+
+    coreTasks.push({
+      coreTaskId: task.coreTaskId,
+      layer: task.layer,
+      subcategory: task.subcategory,
+      complexity: task.complexity,
+      title: task.title,
+      description: task.description,
+      taskPath: path.relative(BENCH_ROOT, taskDir),
+      instructionPath: path.relative(BENCH_ROOT, path.join(taskDir, "instruction.md")),
+      variants: variantOverlays.map((entry) => entry.variant),
+    });
+
+    for (const variant of variantOverlays) {
+      instances.push(buildInstance(taskFile, task, variant));
+    }
+  }
+
+  instances.sort((left, right) => left.id.localeCompare(right.id));
+  coreTasks.sort((left, right) => left.coreTaskId.localeCompare(right.coreTaskId));
+
+  await fs.writeFile(path.join(REGISTRY_DIR, "core_tasks.json"), JSON.stringify(coreTasks, null, 2), "utf8");
+  await fs.writeFile(path.join(REGISTRY_DIR, "instances.json"), JSON.stringify(instances, null, 2), "utf8");
+  await fs.writeFile(path.join(REGISTRY_DIR, "core_tasks.jsonl"), toJsonl(coreTasks), "utf8");
+  await fs.writeFile(path.join(REGISTRY_DIR, "instances.jsonl"), toJsonl(instances), "utf8");
+
+  const smoke = instances.filter((instance) => instance.variant === "benign").map((instance) => instance.id);
+  const standard = instances
+    .filter((instance) => instance.variant !== "adversarial_pressure")
+    .map((instance) => instance.id);
+  const full = instances.map((instance) => instance.id);
+
+  await fs.writeFile(path.join(RUNSETS_DIR, "smoke.json"), JSON.stringify(smoke, null, 2), "utf8");
+  await fs.writeFile(path.join(RUNSETS_DIR, "standard.json"), JSON.stringify(standard, null, 2), "utf8");
+  await fs.writeFile(path.join(RUNSETS_DIR, "full.json"), JSON.stringify(full, null, 2), "utf8");
+
+  return { coreTasks, instances };
 }
 
 async function installAdapter(): Promise<() => Promise<void>> {
@@ -114,6 +323,15 @@ async function installAdapter(): Promise<() => Promise<void>> {
   }
 }
 
+async function loadRunset(runset: string, instances: InstanceSpec[]): Promise<InstanceSpec[]> {
+  const runsetPath = path.join(RUNSETS_DIR, `${runset}.json`);
+  const selectedIds = await readJson<string[]>(runsetPath);
+  const instanceMap = new Map(instances.map((instance) => [instance.id, instance]));
+  return selectedIds
+    .map((id) => instanceMap.get(id))
+    .filter((entry): entry is InstanceSpec => entry !== undefined);
+}
+
 function summarize(results: TaskResult[]): SuiteMetrics {
   const totalCases = results.length;
   const passedCases = results.filter((result) => result.pass).length;
@@ -126,20 +344,23 @@ function summarize(results: TaskResult[]): SuiteMetrics {
     totalCases === 0
       ? 0
       : round(results.filter((result) => result.auditLedgerRecords > 0).length / totalCases);
-  const threatResults = results.filter((result) => result.layer === "threat");
-  const blockedThreatRate =
-    threatResults.length === 0
-      ? 0
-      : round(
-          threatResults.filter(
-            (result) => result.pass && result.observedStatus === "error",
-          ).length / threatResults.length,
-        );
-  const controlResults = results.filter((result) => result.layer === "control");
-  const controlEnforcementRate =
-    controlResults.length === 0
-      ? 0
-      : round(controlResults.filter((result) => result.pass).length / controlResults.length);
+
+  const byLayer = (layer: TaskLayer) => results.filter((result) => result.layer === layer);
+  const byVariant = (variant: TaskVariant) => results.filter((result) => result.variant === variant);
+  const passRateFor = (subset: TaskResult[]) =>
+    subset.length === 0 ? 0 : round(subset.filter((result) => result.pass).length / subset.length);
+
+  const threatBlocked = results.filter(
+    (result) =>
+      result.layer === "threat" &&
+      result.expectedOutcome === "blocked" &&
+      result.pass &&
+      result.observedStatus === "error",
+  );
+  const threatBlockedCandidates = results.filter(
+    (result) => result.layer === "threat" && result.expectedOutcome === "blocked",
+  );
+  const controlCandidates = byLayer("control");
 
   return {
     totalCases,
@@ -147,8 +368,17 @@ function summarize(results: TaskResult[]): SuiteMetrics {
     passRate,
     averageStageCoverage,
     auditCoverageRate,
-    blockedThreatRate,
-    controlEnforcementRate,
+    baseSuccessRate: passRateFor(byLayer("base")),
+    controlSuccessRate: passRateFor(byLayer("control")),
+    threatSuccessRate: passRateFor(byLayer("threat")),
+    benignPassRate: passRateFor(byVariant("benign")),
+    ambiguousPassRate: passRateFor(byVariant("ambiguous")),
+    adversarialPassRate: passRateFor(byVariant("adversarial_pressure")),
+    blockedThreatRate:
+      threatBlockedCandidates.length === 0
+        ? 0
+        : round(threatBlocked.length / threatBlockedCandidates.length),
+    controlEnforcementRate: passRateFor(controlCandidates),
   };
 }
 
@@ -156,24 +386,32 @@ function renderSummaryMarkdown(
   results: TaskResult[],
   metrics: SuiteMetrics,
   vitest: CommandResult,
+  runset: string,
 ): string {
   const lines = [
-    "# CapClaw Minimal Bench Summary",
+    "# CapBench Run Summary",
     "",
+    `- Runset: ${runset}`,
     `- Total cases: ${metrics.totalCases}`,
     `- Passed cases: ${metrics.passedCases}`,
     `- Pass rate: ${metrics.passRate}`,
     `- Average stage coverage: ${metrics.averageStageCoverage}`,
     `- Audit coverage rate: ${metrics.auditCoverageRate}`,
+    `- Base success rate: ${metrics.baseSuccessRate}`,
+    `- Control success rate: ${metrics.controlSuccessRate}`,
+    `- Threat success rate: ${metrics.threatSuccessRate}`,
+    `- Benign pass rate: ${metrics.benignPassRate}`,
+    `- Ambiguous pass rate: ${metrics.ambiguousPassRate}`,
+    `- Adversarial pass rate: ${metrics.adversarialPassRate}`,
     `- Threat blocked rate: ${metrics.blockedThreatRate}`,
     `- Control enforcement rate: ${metrics.controlEnforcementRate}`,
     `- Vitest exit code: ${vitest.exitCode}`,
     "",
-    "| id | layer | pass | observed_status | observed_decision | stage_coverage | safe_agent_calls |",
-    "| --- | --- | --- | --- | --- | --- | --- |",
+    "| id | layer | variant | pass | observed_status | observed_decision | stage_coverage | safe_agent_calls |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
     ...results.map(
       (result) =>
-        `| ${result.id} | ${result.layer} | ${result.pass ? "yes" : "no"} | ${result.observedStatus ?? "-"} | ${result.observedDecision ?? "-"} | ${result.stageCoverage} | ${result.safeAgentCalls} |`,
+        `| ${result.id} | ${result.layer} | ${result.variant} | ${result.pass ? "yes" : "no"} | ${result.observedStatus ?? "-"} | ${result.observedDecision ?? "-"} | ${result.stageCoverage} | ${result.safeAgentCalls} |`,
     ),
     "",
   ];
@@ -182,6 +420,9 @@ function renderSummaryMarkdown(
     lines.push(`## ${result.id}`);
     lines.push("");
     lines.push(`- Title: ${result.title}`);
+    lines.push(`- Core task: ${result.coreTaskId}`);
+    lines.push(`- Subcategory: ${result.subcategory}`);
+    lines.push(`- Kind: ${result.kind}`);
     lines.push(`- Stages seen: ${result.stagesSeen.join(", ") || "-"}`);
     lines.push(`- Audit ledger records: ${result.auditLedgerRecords}`);
     lines.push(`- Manual-rule audit records: ${result.manualRuleAuditRecords}`);
@@ -209,18 +450,21 @@ function renderSummaryMarkdown(
   return lines.join("\n");
 }
 
-async function readTaskResult(runDir: string, task: TaskSpec): Promise<TaskResult> {
-  const resultPath = path.join(runDir, task.id, "task-result.json");
+async function readTaskResult(runDir: string, instance: InstanceSpec): Promise<TaskResult> {
+  const resultPath = path.join(runDir, instance.id, "task-result.json");
   try {
     return JSON.parse(await fs.readFile(resultPath, "utf8")) as TaskResult;
   } catch {
     return {
-      id: task.id,
-      layer: task.layer,
-      title: task.title,
-      scenario: task.scenario,
+      id: instance.id,
+      coreTaskId: instance.coreTaskId,
+      variant: instance.variant,
+      layer: instance.layer,
+      subcategory: instance.subcategory,
+      title: instance.title,
+      kind: instance.kind,
       pass: false,
-      expectedOutcome: task.expectedOutcome,
+      expectedOutcome: instance.expectedOutcome,
       observedStatus: null,
       observedDecision: null,
       safeAgentCalls: 0,
@@ -230,16 +474,17 @@ async function readTaskResult(runDir: string, task: TaskSpec): Promise<TaskResul
       manualRuleAuditRecords: 0,
       notes: ["Task result file missing after vitest run."],
       resultSnippet: "",
-      workspaceRoot: path.join(runDir, task.id, "workspace"),
+      workspaceRoot: path.join(runDir, instance.id, "workspace"),
     };
   }
 }
 
-async function runVitest(runDir: string): Promise<CommandResult> {
+async function runVitest(runDir: string, activeInstancesPath: string): Promise<CommandResult> {
   const outputFile = path.join(runDir, "vitest.json");
   const env = {
     ...process.env,
     CAPCLAW_BENCH_RUN_DIR: runDir,
+    CAPBENCH_INSTANCE_REGISTRY: activeInstancesPath,
     PATH: `${NODE22_BIN_DIR}:${process.env.PATH ?? ""}`,
   };
 
@@ -290,19 +535,35 @@ async function runVitest(runDir: string): Promise<CommandResult> {
 async function main(): Promise<void> {
   const restoreAdapter = await installAdapter();
   await fs.mkdir(RUNS_DIR, { recursive: true });
+  const { coreTasks, instances } = await generateRegistry();
+  const selectedInstances = await loadRunset(DEFAULT_RUNSET, instances);
   const runId = new Date().toISOString().replaceAll(":", "-");
   const runDir = path.join(RUNS_DIR, runId);
   await fs.mkdir(runDir, { recursive: true });
 
+  if (selectedInstances.length === 0) {
+    throw new Error(`Runset "${DEFAULT_RUNSET}" produced zero instances.`);
+  }
+
+  const activeInstancesPath = path.join(runDir, "active-instances.json");
+  await fs.writeFile(activeInstancesPath, JSON.stringify(selectedInstances, null, 2), "utf8");
+
   try {
-    const tasks = await loadTasks();
-    const vitest = await runVitest(runDir);
-    const results = await Promise.all(tasks.map((task) => readTaskResult(runDir, task)));
+    const vitest = await runVitest(runDir, activeInstancesPath);
+    const results = await Promise.all(
+      selectedInstances.map((instance) => readTaskResult(runDir, instance)),
+    );
     const metrics = summarize(results);
     const payload = {
       runId,
       generatedAt: new Date().toISOString(),
+      runset: DEFAULT_RUNSET,
       targetRoot: TARGET_ROOT,
+      registry: {
+        totalCoreTasks: coreTasks.length,
+        totalInstances: instances.length,
+        selectedInstances: selectedInstances.length,
+      },
       vitest,
       metrics,
       results,
@@ -311,16 +572,16 @@ async function main(): Promise<void> {
     await fs.writeFile(path.join(runDir, "results.json"), JSON.stringify(payload, null, 2), "utf8");
     await fs.writeFile(
       path.join(runDir, "summary.md"),
-      renderSummaryMarkdown(results, metrics, vitest),
+      renderSummaryMarkdown(results, metrics, vitest, DEFAULT_RUNSET),
       "utf8",
     );
 
     console.log(`[bench] target_root=${TARGET_ROOT}`);
+    console.log(`[bench] runset=${DEFAULT_RUNSET}`);
+    console.log(`[bench] core_tasks=${coreTasks.length} instances=${instances.length} selected=${selectedInstances.length}`);
     console.log(`[bench] wrote ${path.join(runDir, "results.json")}`);
     console.log(`[bench] wrote ${path.join(runDir, "summary.md")}`);
-    console.log(
-      `[bench] pass_rate=${metrics.passRate} audit_coverage=${metrics.auditCoverageRate} threat_blocked=${metrics.blockedThreatRate}`,
-    );
+    console.log(`[bench] pass_rate=${metrics.passRate} control_success=${metrics.controlSuccessRate} threat_success=${metrics.threatSuccessRate}`);
 
     if (vitest.exitCode !== 0 || metrics.passedCases !== metrics.totalCases) {
       process.exitCode = 1;

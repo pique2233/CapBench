@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CapBench Result",
+  "type": "object",
+  "required": [
+    "id",
+    "coreTaskId",
+    "variant",
+    "layer",
+    "pass",
+    "observedStatus",
+    "observedDecision",
+    "stageCoverage"
+  ],
+  "properties": {
+    "id": { "type": "string" },
+    "coreTaskId": { "type": "string" },
+    "variant": { "type": "string" },
+    "layer": { "type": "string" },
+    "pass": { "type": "boolean" },
+    "observedStatus": { "type": ["string", "null"] },
+    "observedDecision": { "type": ["string", "null"] },
+    "stageCoverage": { "type": "number" }
+  }
+}

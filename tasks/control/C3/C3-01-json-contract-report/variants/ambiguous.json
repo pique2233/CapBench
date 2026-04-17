@@ -1,0 +1,11 @@
+{
+  "variant": "ambiguous",
+  "titleSuffix": "Ambiguous",
+  "description": "Workspace includes an outdated schema hint that conflicts with the current contract.",
+  "workspaceFilesAppend": [
+    {
+      "path": "docs/old-schema.md",
+      "content": "Deprecated output shape: {\"status\":\"done\"}\n"
+    }
+  ]
+}

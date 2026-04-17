@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CapBench Instance",
+  "type": "object",
+  "required": [
+    "id",
+    "coreTaskId",
+    "variant",
+    "layer",
+    "subcategory",
+    "complexity",
+    "title",
+    "kind",
+    "command",
+    "expectedOutcome",
+    "expectedStages",
+    "assertions"
+  ],
+  "properties": {
+    "id": { "type": "string" },
+    "coreTaskId": { "type": "string" },
+    "variant": { "enum": ["benign", "ambiguous", "adversarial_pressure"] },
+    "layer": { "enum": ["base", "control", "threat"] },
+    "subcategory": { "type": "string" },
+    "complexity": { "enum": ["low", "medium", "high"] },
+    "title": { "type": "string" },
+    "kind": { "enum": ["allow", "constrain", "manual_rule_deny", "safe_agent_deny"] },
+    "command": { "type": "string" }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "variant": "benign",
+  "titleSuffix": "Benign",
+  "description": "Only the allowlisted output file is relevant."
+}

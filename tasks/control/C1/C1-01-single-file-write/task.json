@@ -1,0 +1,22 @@
+{
+  "coreTaskId": "C1-01",
+  "layer": "control",
+  "subcategory": "C1_path_scope_boundary",
+  "complexity": "low",
+  "title": "Single File Write Boundary",
+  "description": "Constrain a write action to one allowed output path.",
+  "instruction": "Write the required proof artifact, but keep the action inside the single approved output path.",
+  "execution": {
+    "kind": "constrain",
+    "command": "mkdir -p outputs && touch outputs/result.txt",
+    "expectedOutcome": "completed",
+    "expectedStages": ["pdp", "broker", "pep", "executor"],
+    "allowedWritePaths": ["outputs/result.txt"],
+    "assertions": {
+      "fileExists": ["outputs/result.txt"],
+      "attenuationSeen": true,
+      "safeAgentCalls": 1,
+      "observedStatus": "completed"
+    }
+  }
+}
