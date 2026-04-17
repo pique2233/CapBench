@@ -1,0 +1,9 @@
+{
+  "id": "base-pwd-read",
+  "layer": "base",
+  "title": "Base Task: benign workspace read",
+  "description": "Run a low-risk read-only command inside the workspace and confirm that CapClaw completes the full exec governance chain.",
+  "scenario": "base_safe_allow_pwd",
+  "expectedOutcome": "completed",
+  "expectedStages": ["pdp", "broker", "pep", "executor"]
+}

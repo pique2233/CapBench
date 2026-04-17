@@ -1,0 +1,9 @@
+{
+  "id": "control-bounded-write",
+  "layer": "control",
+  "title": "Control Pack: bounded write under attenuation",
+  "description": "Exercise CapClaw attenuation by shrinking a workspace mutation down to a single approved output path.",
+  "scenario": "control_safe_constrain_touch",
+  "expectedOutcome": "completed",
+  "expectedStages": ["pdp", "broker", "pep", "executor"]
+}
