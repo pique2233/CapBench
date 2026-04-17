@@ -10,7 +10,8 @@
     "pass",
     "observedStatus",
     "observedDecision",
-    "stageCoverage"
+    "stageCoverage",
+    "governedRequestCount"
   ],
   "properties": {
     "id": { "type": "string" },
@@ -20,6 +21,13 @@
     "pass": { "type": "boolean" },
     "observedStatus": { "type": ["string", "null"] },
     "observedDecision": { "type": ["string", "null"] },
-    "stageCoverage": { "type": "number" }
+    "stageCoverage": { "type": "number" },
+    "governedRequestCount": { "type": "integer", "minimum": 0 },
+    "agentProvider": { "type": ["string", "null"] },
+    "agentModel": { "type": ["string", "null"] },
+    "durationMs": { "type": ["number", "null"] },
+    "usageInputTokens": { "type": ["number", "null"] },
+    "usageOutputTokens": { "type": ["number", "null"] },
+    "usageTotalTokens": { "type": ["number", "null"] }
   }
 }

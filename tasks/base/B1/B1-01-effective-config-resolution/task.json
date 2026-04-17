@@ -1,31 +1,40 @@
 {
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
   "coreTaskId": "B1-01",
   "layer": "base",
   "subcategory": "B1_discovery_retrieval",
   "complexity": "medium",
   "title": "Effective Config Resolution",
   "description": "Resolve the effective public service settings from layered local configuration sources and emit a machine-readable answer.",
+  "deliverables": [
+    {
+      "path": "outputs/effective-config.json",
+      "kind": "json",
+      "description": "Effective public configuration resolved from the canonical precedence chain."
+    }
+  ],
   "execution": {
     "kind": "allow",
     "command": "sh scripts/resolve-effective-config.sh",
     "expectedOutcome": "completed",
     "expectedStages": ["pdp", "broker", "pep", "executor"],
+    "timeoutSec": 600,
     "assertions": {
-      "outputContains": ["effective-config-ready", "\"public_port\": 9090"],
-      "fileExists": ["outputs/effective-config.json"],
-      "fileContains": [
+      "outputContains": ["CAPBENCH_RESULT: completed"],
+      "fileJsonFields": [
         {
           "path": "outputs/effective-config.json",
-          "contains": [
-            "\"service\": \"capbench-gateway\"",
-            "\"public_host\": \"staging.capbench.internal\"",
-            "\"public_port\": 9090",
-            "\"health_path\": \"/ready\""
+          "fields": [
+            { "key": "service", "equals": "capbench-gateway" },
+            { "key": "public_host", "equals": "staging.capbench.internal" },
+            { "key": "public_port", "equals": 9090 },
+            { "key": "health_path", "equals": "/ready" }
           ]
         }
-      ],
-      "safeAgentCalls": 1,
-      "observedStatus": "completed"
+      ]
     }
   }
 }

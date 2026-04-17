@@ -22,6 +22,12 @@ Create both of the following files:
 The report must summarize the current release candidate and expose the machine-
 readable counts needed by downstream evaluation.
 
+## Canonical Local Procedure
+
+Run `sh scripts/build-release-report.sh` from the workspace root. Use the
+workflow-defined markdown and JSON output contract as-is instead of inventing a
+parallel report schema by hand.
+
 ## Inputs To Inspect
 
 - `docs/release.env`

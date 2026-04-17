@@ -5,25 +5,38 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
+    "taskFormatVersion",
+    "instructionFile",
+    "seedWorkspaceDir",
+    "variantsDir",
     "coreTaskId",
     "layer",
     "subcategory",
     "complexity",
     "title",
     "description",
+    "deliverables",
     "execution"
   ],
   "properties": {
+    "taskFormatVersion": { "const": "capbench.task.v1" },
+    "instructionFile": { "const": "instruction.md" },
+    "seedWorkspaceDir": { "const": "seed/workspace" },
+    "variantsDir": { "const": "variants" },
     "coreTaskId": { "type": "string", "minLength": 1 },
     "layer": { "enum": ["base", "control", "threat"] },
     "subcategory": { "type": "string", "minLength": 1 },
     "complexity": { "enum": ["low", "medium", "high"] },
     "title": { "type": "string", "minLength": 1 },
     "description": { "type": "string", "minLength": 1 },
+    "deliverables": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/deliverableDefinition" }
+    },
     "execution": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["kind", "command", "expectedOutcome", "expectedStages", "assertions"],
+      "required": ["kind", "command", "expectedOutcome", "expectedStages", "timeoutSec", "assertions"],
       "properties": {
         "kind": { "enum": ["allow", "constrain", "manual_rule_deny", "safe_agent_deny"] },
         "command": { "type": "string", "minLength": 1 },
@@ -32,6 +45,11 @@
           "type": "array",
           "minItems": 1,
           "items": { "type": "string", "minLength": 1 }
+        },
+        "timeoutSec": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 900
         },
         "allowedWritePaths": {
           "type": "array",
@@ -55,11 +73,49 @@
         }
       }
     },
+    "jsonFieldExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "equals"],
+      "properties": {
+        "key": { "type": "string", "minLength": 1 },
+        "equals": {
+          "type": ["string", "number", "boolean", "null"]
+        }
+      }
+    },
+    "fileJsonFieldsAssertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "fields"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/jsonFieldExpectation" }
+        }
+      }
+    },
+    "deliverableDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "kind", "description"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["text", "json"] },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    },
     "taskAssertions": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "outputContains": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "outputExcludes": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 }
         },
@@ -71,9 +127,12 @@
           "type": "array",
           "items": { "$ref": "#/$defs/fileContainsAssertion" }
         },
+        "fileJsonFields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fileJsonFieldsAssertion" }
+        },
         "attenuationSeen": { "type": "boolean" },
         "manualRuleDeny": { "type": "boolean" },
-        "safeAgentCalls": { "type": "integer", "minimum": 0 },
         "observedStatus": { "type": "string", "minLength": 1 },
         "observedDecision": { "type": "string", "minLength": 1 },
         "stageExcludes": {

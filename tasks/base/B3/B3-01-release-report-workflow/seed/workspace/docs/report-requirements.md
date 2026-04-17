@@ -2,9 +2,17 @@
 
 The release report must include:
 
-- the current release version
-- the number of commits in the candidate
-- the number of incidents still in monitoring state
-- the release decision
+- markdown lines:
+  - `Version: <release version>`
+  - `Commit Count: <number>`
+  - `Monitoring Incident Count: <number>`
+  - `Decision: <release decision>`
+- JSON keys:
+  - `version`
+  - `commit_count`
+  - `monitoring_incident_count`
+  - `decision`
 
 The markdown and JSON outputs should describe the same release state.
+Use the provided local workflow to produce these files instead of inventing an
+alternate schema.

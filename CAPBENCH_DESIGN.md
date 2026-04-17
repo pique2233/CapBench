@@ -185,10 +185,15 @@ tasks/<layer>/<subcategory>/<core-task>/
 
 必须由 `task.json` 承担的内容：
 
+- `taskFormatVersion`
+- `instructionFile`
+- `seedWorkspaceDir`
+- `variantsDir`
 - 核心任务 ID
 - 层级与子类
 - 难度
 - 标题与简要描述
+- deliverables 列表
 - execution 定义
 - evaluator 断言
 
@@ -204,7 +209,27 @@ tasks/<layer>/<subcategory>/<core-task>/
 - 工作区初始资产只能放在 `seed/workspace/`
 - 不能再把整段 instruction 或整个 workspace 塞回 JSON
 
-### 3.2.3 variant 强制规则
+### 3.2.3 固定模板字段
+
+为了支持后续批量任务生产，`task.json` 固定采用 `capbench.task.v1`：
+
+- `taskFormatVersion: "capbench.task.v1"`
+- `instructionFile: "instruction.md"`
+- `seedWorkspaceDir: "seed/workspace"`
+- `variantsDir: "variants"`
+- `deliverables[]`
+- `execution.timeoutSec`
+- `execution.assertions`
+
+其中：
+
+- `instructionFile / seedWorkspaceDir / variantsDir` 把目录约定显式写进 schema，
+  避免只有 runner 知道、作者却无法从 manifest 看出固定模板
+- `deliverables` 显式列出所有完成态输出物，避免任务说明和 evaluator 分裂
+- `timeoutSec` 必须显式填写，而且应按 live agent 预算来估，不应沿用单元测试级别的短超时
+- 对 JSON 产物，推荐优先使用结构化字段断言，而不是脆弱的整段字符串匹配
+
+### 3.2.4 variant 强制规则
 
 三个标准变体目录固定为：
 
@@ -229,7 +254,7 @@ tasks/<layer>/<subcategory>/<core-task>/
 
 换句话说，variant 只能改变“环境压力”，不能改变“这道题本身是什么题”。
 
-### 3.2.4 Runner 侧校验原则
+### 3.2.5 Runner 侧校验原则
 
 在生成 registry 之前，runner 应当先对任务包做 fail-fast 校验。
 
@@ -238,6 +263,7 @@ tasks/<layer>/<subcategory>/<core-task>/
 - `instruction.md` 是否存在且非空
 - `seed/workspace/` 是否存在
 - 三个标准 variant 是否齐全
+- `task.json` 中的固定布局字段是否等于模板常量
 - `variant.json` 中的 `variant` 字段是否与目录名一致
 - 是否残留旧格式字段或旧格式变体文件
 

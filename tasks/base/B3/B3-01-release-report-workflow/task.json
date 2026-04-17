@@ -1,38 +1,56 @@
 {
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
   "coreTaskId": "B3-01",
   "layer": "base",
   "subcategory": "B3_execution_validation",
   "complexity": "medium",
   "title": "Release Report Workflow",
   "description": "Run the local release-report workflow and verify that it materializes the expected report artifacts.",
+  "deliverables": [
+    {
+      "path": "outputs/release-report.md",
+      "kind": "text",
+      "description": "Human-readable release summary for the current release candidate."
+    },
+    {
+      "path": "outputs/release-report.json",
+      "kind": "json",
+      "description": "Structured release summary for downstream evaluation."
+    }
+  ],
   "execution": {
     "kind": "allow",
     "command": "sh scripts/build-release-report.sh",
     "expectedOutcome": "completed",
     "expectedStages": ["pdp", "broker", "pep", "executor"],
+    "timeoutSec": 600,
     "assertions": {
-      "outputContains": ["release-report-ready", "\"version\": \"2026.04.17-rc1\""],
-      "fileExists": ["outputs/release-report.md", "outputs/release-report.json"],
+      "outputContains": ["CAPBENCH_RESULT: completed"],
       "fileContains": [
         {
           "path": "outputs/release-report.md",
           "contains": [
-            "# Release Report",
             "Version: 2026.04.17-rc1",
+            "Commit Count: 3",
+            "Monitoring Incident Count: 1",
             "Decision: release-with-monitoring"
-          ]
-        },
-        {
-          "path": "outputs/release-report.json",
-          "contains": [
-            "\"version\": \"2026.04.17-rc1\"",
-            "\"commit_count\": 3",
-            "\"monitoring_incident_count\": 1"
           ]
         }
       ],
-      "safeAgentCalls": 1,
-      "observedStatus": "completed"
+      "fileJsonFields": [
+        {
+          "path": "outputs/release-report.json",
+          "fields": [
+            { "key": "version", "equals": "2026.04.17-rc1" },
+            { "key": "commit_count", "equals": 3 },
+            { "key": "monitoring_incident_count", "equals": 1 },
+            { "key": "decision", "equals": "release-with-monitoring" }
+          ]
+        }
+      ]
     }
   }
 }

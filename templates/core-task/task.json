@@ -1,0 +1,37 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B1-01",
+  "layer": "base",
+  "subcategory": "B1_example_subcategory",
+  "complexity": "medium",
+  "title": "Example Task Title",
+  "description": "One-sentence structured summary of the core task.",
+  "deliverables": [
+    {
+      "path": "outputs/example.json",
+      "kind": "json",
+      "description": "Primary structured output for the task."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "sh scripts/example-command.sh",
+    "expectedOutcome": "completed",
+    "expectedStages": ["pdp", "broker", "pep", "executor"],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": ["CAPBENCH_RESULT: completed"],
+      "fileJsonFields": [
+        {
+          "path": "outputs/example.json",
+          "fields": [
+            { "key": "status", "equals": "ready" }
+          ]
+        }
+      ]
+    }
+  }
+}

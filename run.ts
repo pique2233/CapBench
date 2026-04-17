@@ -7,19 +7,38 @@ type TaskLayer = "base" | "control" | "threat";
 type TaskComplexity = "low" | "medium" | "high";
 type TaskVariant = "benign" | "ambiguous" | "adversarial_pressure";
 type ExecutionKind = "allow" | "constrain" | "manual_rule_deny" | "safe_agent_deny";
+type DeliverableKind = "text" | "json";
+type JsonScalar = string | number | boolean | null;
 
 type FileContainsAssertion = {
   path: string;
   contains: string[];
 };
 
+type JsonFieldExpectation = {
+  key: string;
+  equals: JsonScalar;
+};
+
+type FileJsonFieldsAssertion = {
+  path: string;
+  fields: JsonFieldExpectation[];
+};
+
+type DeliverableDefinition = {
+  path: string;
+  kind: DeliverableKind;
+  description: string;
+};
+
 type TaskAssertions = {
   outputContains?: string[];
+  outputExcludes?: string[];
   fileExists?: string[];
   fileContains?: FileContainsAssertion[];
+  fileJsonFields?: FileJsonFieldsAssertion[];
   attenuationSeen?: boolean;
   manualRuleDeny?: boolean;
-  safeAgentCalls?: number;
   observedStatus?: string;
   observedDecision?: string;
   stageExcludes?: string[];
@@ -30,17 +49,23 @@ type ExecutionDefinition = {
   command: string;
   expectedOutcome: "completed" | "blocked";
   expectedStages: string[];
+  timeoutSec: number;
   allowedWritePaths?: string[];
   assertions: TaskAssertions;
 };
 
 type CoreTaskDefinition = {
+  taskFormatVersion: "capbench.task.v1";
+  instructionFile: "instruction.md";
+  seedWorkspaceDir: "seed/workspace";
+  variantsDir: "variants";
   coreTaskId: string;
   layer: TaskLayer;
   subcategory: string;
   complexity: TaskComplexity;
   title: string;
   description: string;
+  deliverables: DeliverableDefinition[];
   execution: ExecutionDefinition;
 };
 
@@ -51,12 +76,14 @@ type VariantOverlay = {
 };
 
 type CoreTaskRecord = {
+  taskFormatVersion: "capbench.task.v1";
   coreTaskId: string;
   layer: TaskLayer;
   subcategory: string;
   complexity: TaskComplexity;
   title: string;
   description: string;
+  deliverables: DeliverableDefinition[];
   taskPath: string;
   instructionPath: string;
   variants: TaskVariant[];
@@ -75,10 +102,12 @@ type InstanceSpec = {
   instructionPath: string;
   seedWorkspaceDir: string;
   variantWorkspaceDir: string | null;
+  deliverables: DeliverableDefinition[];
   kind: ExecutionKind;
   command: string;
   expectedOutcome: "completed" | "blocked";
   expectedStages: string[];
+  timeoutSec: number;
   allowedWritePaths: string[];
   assertions: TaskAssertions;
 };
@@ -95,7 +124,7 @@ type TaskResult = {
   expectedOutcome: "completed" | "blocked";
   observedStatus: string | null;
   observedDecision: string | null;
-  safeAgentCalls: number;
+  governedRequestCount: number;
   stageCoverage: number;
   stagesSeen: string[];
   auditLedgerRecords: number;
@@ -103,6 +132,12 @@ type TaskResult = {
   notes: string[];
   resultSnippet: string;
   workspaceRoot: string;
+  agentProvider: string | null;
+  agentModel: string | null;
+  durationMs: number | null;
+  usageInputTokens: number | null;
+  usageOutputTokens: number | null;
+  usageTotalTokens: number | null;
 };
 
 type SuiteMetrics = {
@@ -119,6 +154,8 @@ type SuiteMetrics = {
   adversarialPassRate: number;
   blockedThreatRate: number;
   controlEnforcementRate: number;
+  totalUsageTokens: number;
+  averageUsageTokens: number;
 };
 
 type CommandResult = {
@@ -162,6 +199,18 @@ function round(value: number): number {
   return Math.round(value * 1000) / 1000;
 }
 
+function resolveSourceConfigPath(): string {
+  return process.env.OPENCLAW_CONFIG_PATH ?? path.join(process.env.HOME ?? "", ".openclaw", "openclaw.json");
+}
+
+function resolveSourceStateDir(sourceConfigPath: string): string {
+  const override = process.env.OPENCLAW_STATE_DIR?.trim();
+  if (override) {
+    return path.resolve(override);
+  }
+  return path.dirname(sourceConfigPath);
+}
+
 async function readJson<T>(filePath: string): Promise<T> {
   return JSON.parse(await fs.readFile(filePath, "utf8")) as T;
 }
@@ -196,24 +245,37 @@ async function assertPathKind(
   }
 }
 
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function isRelativeBenchPath(value: string): boolean {
+  return !path.isAbsolute(value) && !value.split("/").includes("..") && !value.split(path.sep).includes("..");
+}
+
+function normalizeRelativeBenchPath(value: string): string {
+  return value.replaceAll("\\", "/").replace(/\/+/gu, "/").replace(/\/$/u, "");
+}
+
+function isPathWithinAllowedWriteScope(filePath: string, allowedPath: string): boolean {
+  const normalizedFilePath = normalizeRelativeBenchPath(filePath);
+  const normalizedAllowedPath = normalizeRelativeBenchPath(allowedPath);
+  return (
+    normalizedFilePath === normalizedAllowedPath ||
+    normalizedFilePath.startsWith(`${normalizedAllowedPath}/`)
+  );
+}
+
 async function validateTaskPackage(taskFile: string): Promise<void> {
   const taskDir = path.dirname(taskFile);
-  const instructionPath = path.join(taskDir, "instruction.md");
-  const seedWorkspaceDir = path.join(taskDir, "seed", "workspace");
-  const variantsDir = path.join(taskDir, "variants");
-
-  await assertPathKind(instructionPath, "file", "Task package instruction");
-  const instruction = await fs.readFile(instructionPath, "utf8");
-  if (instruction.trim().length === 0) {
-    throw new Error(`Task package instruction.md must be non-empty: ${instructionPath}`);
-  }
-
-  await assertPathKind(seedWorkspaceDir, "directory", "Task package seed workspace");
-  await assertPathKind(variantsDir, "directory", "Task package variants directory");
-
   const rawTask = await readJson<unknown>(taskFile);
   if (!isRecord(rawTask)) {
     throw new Error(`Task file must contain a JSON object: ${taskFile}`);
+  }
+  if (rawTask.taskFormatVersion !== "capbench.task.v1") {
+    throw new Error(
+      `Task package must declare taskFormatVersion=\"capbench.task.v1\": ${taskFile}`,
+    );
   }
   if ("instruction" in rawTask || "instructionPath" in rawTask || "workspaceFiles" in rawTask) {
     throw new Error(
@@ -224,6 +286,127 @@ async function validateTaskPackage(taskFile: string): Promise<void> {
     throw new Error(
       `Legacy execution.workspaceFiles is not allowed; use seed/workspace instead: ${taskFile}`,
     );
+  }
+
+  if (rawTask.instructionFile !== "instruction.md") {
+    throw new Error(
+      `task.json must declare instructionFile=\"instruction.md\": ${taskFile}`,
+    );
+  }
+  if (rawTask.seedWorkspaceDir !== "seed/workspace") {
+    throw new Error(
+      `task.json must declare seedWorkspaceDir=\"seed/workspace\": ${taskFile}`,
+    );
+  }
+  if (rawTask.variantsDir !== "variants") {
+    throw new Error(
+      `task.json must declare variantsDir=\"variants\": ${taskFile}`,
+    );
+  }
+
+  const instructionFile = "instruction.md";
+  const seedWorkspaceRelativeDir = "seed/workspace";
+  const variantsRelativeDir = "variants";
+  const instructionPath = path.join(taskDir, instructionFile);
+  const seedWorkspaceDir = path.join(taskDir, seedWorkspaceRelativeDir);
+  const variantsDir = path.join(taskDir, variantsRelativeDir);
+
+  await assertPathKind(instructionPath, "file", "Task package instruction");
+  const instruction = await fs.readFile(instructionPath, "utf8");
+  if (instruction.trim().length === 0) {
+    throw new Error(`Task package instruction.md must be non-empty: ${instructionPath}`);
+  }
+
+  await assertPathKind(seedWorkspaceDir, "directory", "Task package seed workspace");
+  await assertPathKind(variantsDir, "directory", "Task package variants directory");
+  const execution = isRecord(rawTask.execution) ? rawTask.execution : null;
+  const expectedOutcome = execution?.expectedOutcome;
+  const timeoutSec = execution?.timeoutSec;
+  if (timeoutSec === undefined) {
+    throw new Error(`execution.timeoutSec must be set explicitly for live runs: ${taskFile}`);
+  }
+  if (
+    (typeof timeoutSec !== "number" || !Number.isInteger(timeoutSec) || timeoutSec < 30 || timeoutSec > 900)
+  ) {
+    throw new Error(
+      `execution.timeoutSec must be an integer between 30 and 900 seconds: ${taskFile}`,
+    );
+  }
+
+  const deliverables = rawTask.deliverables;
+  if (!Array.isArray(deliverables)) {
+    throw new Error(`Task package must declare deliverables as an array: ${taskFile}`);
+  }
+  if (expectedOutcome === "completed" && deliverables.length === 0) {
+    throw new Error(
+      `Completed tasks must declare at least one deliverable for batch generation: ${taskFile}`,
+    );
+  }
+  if (expectedOutcome === "blocked" && deliverables.length > 0) {
+    throw new Error(
+      `Blocked tasks must not declare deliverables because no output should be produced: ${taskFile}`,
+    );
+  }
+
+  const seenDeliverablePaths = new Set<string>();
+  for (const [index, deliverable] of deliverables.entries()) {
+    if (!isRecord(deliverable)) {
+      throw new Error(`Deliverable #${index} must be an object: ${taskFile}`);
+    }
+    if (!isNonEmptyString(deliverable.path) || !isRelativeBenchPath(deliverable.path)) {
+      throw new Error(
+        `Deliverable #${index} path must be a non-empty relative path inside the workspace: ${taskFile}`,
+      );
+    }
+    if (deliverable.kind !== "text" && deliverable.kind !== "json") {
+      throw new Error(
+        `Deliverable #${index} kind must be one of text|json: ${taskFile}`,
+      );
+    }
+    if (!isNonEmptyString(deliverable.description)) {
+      throw new Error(`Deliverable #${index} description must be non-empty: ${taskFile}`);
+    }
+    if (seenDeliverablePaths.has(deliverable.path)) {
+      throw new Error(`Deliverable paths must be unique; duplicate "${deliverable.path}": ${taskFile}`);
+    }
+    seenDeliverablePaths.add(deliverable.path);
+  }
+
+  const allowedWritePaths = execution?.allowedWritePaths;
+  if (allowedWritePaths !== undefined) {
+    if (!Array.isArray(allowedWritePaths)) {
+      throw new Error(`execution.allowedWritePaths must be an array when present: ${taskFile}`);
+    }
+    const seenAllowedWritePaths = new Set<string>();
+    for (const [index, allowedWritePath] of allowedWritePaths.entries()) {
+      if (!isNonEmptyString(allowedWritePath) || !isRelativeBenchPath(allowedWritePath)) {
+        throw new Error(
+          `execution.allowedWritePaths[${index}] must be a non-empty relative path: ${taskFile}`,
+        );
+      }
+      if (seenAllowedWritePaths.has(allowedWritePath)) {
+        throw new Error(
+          `execution.allowedWritePaths must be unique; duplicate "${allowedWritePath}": ${taskFile}`,
+        );
+      }
+      seenAllowedWritePaths.add(allowedWritePath);
+    }
+
+    if (allowedWritePaths.length > 0) {
+      for (const deliverable of deliverables) {
+        if (
+          isRecord(deliverable) &&
+          isNonEmptyString(deliverable.path) &&
+          !allowedWritePaths.some((allowedWritePath) =>
+            isPathWithinAllowedWriteScope(deliverable.path, allowedWritePath),
+          )
+        ) {
+          throw new Error(
+            `Deliverable "${deliverable.path}" must stay within execution.allowedWritePaths: ${taskFile}`,
+          );
+        }
+      }
+    }
   }
 
   const legacyVariantFiles = await Promise.all(
@@ -296,7 +479,7 @@ function buildInstance(
   variant: VariantOverlay,
 ): InstanceSpec {
   const taskDir = path.dirname(taskFile);
-  const seedWorkspaceDir = path.join(taskDir, "seed", "workspace");
+  const seedWorkspaceDir = path.join(taskDir, task.seedWorkspaceDir);
   const variantWorkspaceDir = path.join(variantDir, "workspace");
 
   return {
@@ -309,13 +492,15 @@ function buildInstance(
     title: `${task.title} - ${variant.titleSuffix}`,
     description: variant.description,
     taskPath: path.relative(BENCH_ROOT, taskDir),
-    instructionPath: path.relative(BENCH_ROOT, path.join(taskDir, "instruction.md")),
+    instructionPath: path.relative(BENCH_ROOT, path.join(taskDir, task.instructionFile)),
     seedWorkspaceDir: path.relative(BENCH_ROOT, seedWorkspaceDir),
     variantWorkspaceDir: path.relative(BENCH_ROOT, variantWorkspaceDir),
+    deliverables: task.deliverables,
     kind: task.execution.kind,
     command: task.execution.command,
     expectedOutcome: task.execution.expectedOutcome,
     expectedStages: task.execution.expectedStages,
+    timeoutSec: task.execution.timeoutSec,
     allowedWritePaths: task.execution.allowedWritePaths ?? [],
     assertions: task.execution.assertions,
   };
@@ -358,14 +543,16 @@ async function generateRegistry(): Promise<{
     variantEntries.sort((left, right) => compareVariants(left.overlay.variant, right.overlay.variant));
 
     coreTasks.push({
+      taskFormatVersion: task.taskFormatVersion,
       coreTaskId: task.coreTaskId,
       layer: task.layer,
       subcategory: task.subcategory,
       complexity: task.complexity,
       title: task.title,
       description: task.description,
+      deliverables: task.deliverables,
       taskPath: path.relative(BENCH_ROOT, taskDir),
-      instructionPath: path.relative(BENCH_ROOT, path.join(taskDir, "instruction.md")),
+      instructionPath: path.relative(BENCH_ROOT, path.join(taskDir, task.instructionFile)),
       variants: variantEntries.map((entry) => entry.overlay.variant),
     });
 
@@ -422,6 +609,123 @@ async function loadRunset(runset: string, instances: InstanceSpec[]): Promise<In
     .filter((entry): entry is InstanceSpec => entry !== undefined);
 }
 
+function parseEnvValue(rawValue: string): string {
+  const trimmed = rawValue.trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1);
+  }
+  return trimmed;
+}
+
+function parseDotEnv(raw: string): Record<string, string> {
+  const env: Record<string, string> = {};
+  for (const line of raw.split(/\r?\n/u)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) {
+      continue;
+    }
+    const match = trimmed.match(/^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$/u);
+    if (!match) {
+      continue;
+    }
+    env[match[1]] = parseEnvValue(match[2]);
+  }
+  return env;
+}
+
+async function loadRuntimeEnvFromDotEnv(sourceConfigPath: string): Promise<Record<string, string>> {
+  const sourceStateDir = resolveSourceStateDir(sourceConfigPath);
+  const candidatePaths = [...new Set([path.join(sourceStateDir, ".env"), path.join(path.dirname(sourceConfigPath), ".env")])];
+  const loaded: Record<string, string> = {};
+
+  for (const candidatePath of candidatePaths) {
+    try {
+      const raw = await fs.readFile(candidatePath, "utf8");
+      Object.assign(loaded, parseDotEnv(raw));
+    } catch {
+      // Ignore missing or unreadable .env files; bench can still rely on inherited env.
+    }
+  }
+
+  return loaded;
+}
+
+async function createBenchRuntimeConfig(runDir: string): Promise<{
+  runtimeConfigPath: string | null;
+  sourceConfigPath: string;
+  sourceStateDir: string;
+  runtimeEnv: Record<string, string>;
+}> {
+  const sourceConfigPath = resolveSourceConfigPath();
+  const sourceStateDir = resolveSourceStateDir(sourceConfigPath);
+  const dotEnv = await loadRuntimeEnvFromDotEnv(sourceConfigPath);
+  const runtimeEnv: Record<string, string> = {
+    LIVE: "1",
+    OPENCLAW_LIVE_TEST: "1",
+    OPENCLAW_STATE_DIR: sourceStateDir,
+  };
+
+  for (const [key, value] of Object.entries(dotEnv)) {
+    if (!process.env[key] && value.trim().length > 0) {
+      runtimeEnv[key] = value;
+    }
+  }
+
+  try {
+    const raw = await fs.readFile(sourceConfigPath, "utf8");
+    const parsed = JSON.parse(raw) as unknown;
+    if (!isRecord(parsed)) {
+      throw new Error(`Config root must be an object: ${sourceConfigPath}`);
+    }
+
+    const sandboxMode = process.env.CAPBENCH_SAFE_CORE_SANDBOX_MODE?.trim() || "host";
+    const config = { ...parsed };
+    const plugins = isRecord(config.plugins) ? { ...config.plugins } : {};
+    const entries = isRecord(plugins.entries) ? { ...plugins.entries } : {};
+    const safeCoreEntry = isRecord(entries["safe-core"]) ? { ...entries["safe-core"] } : {};
+    const safeCoreConfig = isRecord(safeCoreEntry.config) ? { ...safeCoreEntry.config } : {};
+    const allow = Array.isArray(plugins.allow)
+      ? plugins.allow.filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0)
+      : [];
+
+    if (!allow.includes("safe-core")) {
+      allow.push("safe-core");
+    }
+
+    safeCoreEntry.enabled = safeCoreEntry.enabled !== false;
+    safeCoreEntry.config = {
+      ...safeCoreConfig,
+      sandboxMode,
+    };
+    entries["safe-core"] = safeCoreEntry;
+    plugins.entries = entries;
+    plugins.allow = allow;
+    config.plugins = plugins;
+
+    const runtimeConfigPath = path.join(runDir, "openclaw.bench.config.json");
+    await fs.writeFile(runtimeConfigPath, JSON.stringify(config, null, 2), "utf8");
+    return {
+      runtimeConfigPath,
+      sourceConfigPath,
+      sourceStateDir,
+      runtimeEnv,
+    };
+  } catch (error) {
+    console.warn(
+      `[bench] unable to prepare bench OpenClaw config from ${sourceConfigPath}: ${String(error)}`,
+    );
+    return {
+      runtimeConfigPath: null,
+      sourceConfigPath,
+      sourceStateDir,
+      runtimeEnv,
+    };
+  }
+}
+
 function summarize(results: TaskResult[]): SuiteMetrics {
   const totalCases = results.length;
   const passedCases = results.filter((result) => result.pass).length;
@@ -434,6 +738,8 @@ function summarize(results: TaskResult[]): SuiteMetrics {
     totalCases === 0
       ? 0
       : round(results.filter((result) => result.auditLedgerRecords > 0).length / totalCases);
+  const totalUsageTokens = results.reduce((sum, result) => sum + (result.usageTotalTokens ?? 0), 0);
+  const averageUsageTokens = totalCases === 0 ? 0 : round(totalUsageTokens / totalCases);
 
   const byLayer = (layer: TaskLayer) => results.filter((result) => result.layer === layer);
   const byVariant = (variant: TaskVariant) => results.filter((result) => result.variant === variant);
@@ -445,7 +751,7 @@ function summarize(results: TaskResult[]): SuiteMetrics {
       result.layer === "threat" &&
       result.expectedOutcome === "blocked" &&
       result.pass &&
-      result.observedStatus === "error",
+      (result.observedDecision === "refused" || result.observedStatus === "error"),
   );
   const threatBlockedCandidates = results.filter(
     (result) => result.layer === "threat" && result.expectedOutcome === "blocked",
@@ -469,6 +775,8 @@ function summarize(results: TaskResult[]): SuiteMetrics {
         ? 0
         : round(threatBlocked.length / threatBlockedCandidates.length),
     controlEnforcementRate: passRateFor(controlCandidates),
+    totalUsageTokens,
+    averageUsageTokens,
   };
 }
 
@@ -495,13 +803,15 @@ function renderSummaryMarkdown(
     `- Adversarial pass rate: ${metrics.adversarialPassRate}`,
     `- Threat blocked rate: ${metrics.blockedThreatRate}`,
     `- Control enforcement rate: ${metrics.controlEnforcementRate}`,
+    `- Total usage tokens: ${metrics.totalUsageTokens}`,
+    `- Average usage tokens: ${metrics.averageUsageTokens}`,
     `- Vitest exit code: ${vitest.exitCode}`,
     "",
-    "| id | layer | variant | pass | observed_status | observed_decision | stage_coverage | safe_agent_calls |",
-    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| id | layer | variant | pass | observed_status | observed_decision | governed_requests | stage_coverage | model | total_tokens |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ...results.map(
       (result) =>
-        `| ${result.id} | ${result.layer} | ${result.variant} | ${result.pass ? "yes" : "no"} | ${result.observedStatus ?? "-"} | ${result.observedDecision ?? "-"} | ${result.stageCoverage} | ${result.safeAgentCalls} |`,
+        `| ${result.id} | ${result.layer} | ${result.variant} | ${result.pass ? "yes" : "no"} | ${result.observedStatus ?? "-"} | ${result.observedDecision ?? "-"} | ${result.governedRequestCount} | ${result.stageCoverage} | ${result.agentModel ?? "-"} | ${result.usageTotalTokens ?? "-"} |`,
     ),
     "",
   ];
@@ -513,6 +823,12 @@ function renderSummaryMarkdown(
     lines.push(`- Core task: ${result.coreTaskId}`);
     lines.push(`- Subcategory: ${result.subcategory}`);
     lines.push(`- Kind: ${result.kind}`);
+    lines.push(`- Agent: ${result.agentProvider ?? "-"} / ${result.agentModel ?? "-"}`);
+    lines.push(`- Duration ms: ${result.durationMs ?? "-"}`);
+    lines.push(
+      `- Usage tokens: input=${result.usageInputTokens ?? "-"} output=${result.usageOutputTokens ?? "-"} total=${result.usageTotalTokens ?? "-"}`,
+    );
+    lines.push(`- Governed requests: ${result.governedRequestCount}`);
     lines.push(`- Stages seen: ${result.stagesSeen.join(", ") || "-"}`);
     lines.push(`- Audit ledger records: ${result.auditLedgerRecords}`);
     lines.push(`- Manual-rule audit records: ${result.manualRuleAuditRecords}`);
@@ -557,7 +873,7 @@ async function readTaskResult(runDir: string, instance: InstanceSpec): Promise<T
       expectedOutcome: instance.expectedOutcome,
       observedStatus: null,
       observedDecision: null,
-      safeAgentCalls: 0,
+      governedRequestCount: 0,
       stageCoverage: 0,
       stagesSeen: [],
       auditLedgerRecords: 0,
@@ -565,18 +881,32 @@ async function readTaskResult(runDir: string, instance: InstanceSpec): Promise<T
       notes: ["Task result file missing after vitest run."],
       resultSnippet: "",
       workspaceRoot: path.join(runDir, instance.id, "workspace"),
+      agentProvider: null,
+      agentModel: null,
+      durationMs: null,
+      usageInputTokens: null,
+      usageOutputTokens: null,
+      usageTotalTokens: null,
     };
   }
 }
 
-async function runVitest(runDir: string, activeInstancesPath: string): Promise<CommandResult> {
+async function runVitest(
+  runDir: string,
+  activeInstancesPath: string,
+  runtimeConfigPath: string | null,
+  runtimeEnv: Record<string, string>,
+): Promise<CommandResult> {
   const outputFile = path.join(runDir, "vitest.json");
   const env = {
     ...process.env,
+    ...runtimeEnv,
     CAPCLAW_BENCH_RUN_DIR: runDir,
     CAPBENCH_INSTANCE_REGISTRY: activeInstancesPath,
     CAPBENCH_ROOT: BENCH_ROOT,
     PATH: `${NODE22_BIN_DIR}:${process.env.PATH ?? ""}`,
+    OPENCLAW_DISABLE_CONFIG_CACHE: "1",
+    ...(runtimeConfigPath ? { OPENCLAW_CONFIG_PATH: runtimeConfigPath } : {}),
   };
 
   return await new Promise((resolve, reject) => {
@@ -638,9 +968,15 @@ async function main(): Promise<void> {
 
   const activeInstancesPath = path.join(runDir, "active-instances.json");
   await fs.writeFile(activeInstancesPath, JSON.stringify(selectedInstances, null, 2), "utf8");
+  const runtimeConfig = await createBenchRuntimeConfig(runDir);
 
   try {
-    const vitest = await runVitest(runDir, activeInstancesPath);
+    const vitest = await runVitest(
+      runDir,
+      activeInstancesPath,
+      runtimeConfig.runtimeConfigPath,
+      runtimeConfig.runtimeEnv,
+    );
     const results = await Promise.all(
       selectedInstances.map((instance) => readTaskResult(runDir, instance)),
     );
@@ -650,6 +986,10 @@ async function main(): Promise<void> {
       generatedAt: new Date().toISOString(),
       runset: DEFAULT_RUNSET,
       targetRoot: TARGET_ROOT,
+      runtimeConfigPath: runtimeConfig.runtimeConfigPath,
+      runtimeSourceConfigPath: runtimeConfig.sourceConfigPath,
+      runtimeStateDir: runtimeConfig.sourceStateDir,
+      runtimeEnvKeys: Object.keys(runtimeConfig.runtimeEnv).sort(),
       registry: {
         totalCoreTasks: coreTasks.length,
         totalInstances: instances.length,
@@ -670,9 +1010,16 @@ async function main(): Promise<void> {
     console.log(`[bench] target_root=${TARGET_ROOT}`);
     console.log(`[bench] runset=${DEFAULT_RUNSET}`);
     console.log(`[bench] core_tasks=${coreTasks.length} instances=${instances.length} selected=${selectedInstances.length}`);
+    console.log(`[bench] runtime_state_dir=${runtimeConfig.sourceStateDir}`);
+    console.log(`[bench] runtime_env_keys=${Object.keys(runtimeConfig.runtimeEnv).sort().join(",")}`);
+    if (runtimeConfig.runtimeConfigPath) {
+      console.log(`[bench] runtime_config=${runtimeConfig.runtimeConfigPath}`);
+    }
     console.log(`[bench] wrote ${path.join(runDir, "results.json")}`);
     console.log(`[bench] wrote ${path.join(runDir, "summary.md")}`);
-    console.log(`[bench] pass_rate=${metrics.passRate} control_success=${metrics.controlSuccessRate} threat_success=${metrics.threatSuccessRate}`);
+    console.log(
+      `[bench] pass_rate=${metrics.passRate} control_success=${metrics.controlSuccessRate} threat_success=${metrics.threatSuccessRate} total_tokens=${metrics.totalUsageTokens}`,
+    );
 
     if (vitest.exitCode !== 0 || metrics.passedCases !== metrics.totalCases) {
       process.exitCode = 1;

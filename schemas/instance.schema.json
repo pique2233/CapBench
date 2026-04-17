@@ -10,10 +10,12 @@
     "subcategory",
     "complexity",
     "title",
+    "deliverables",
     "kind",
     "command",
     "expectedOutcome",
     "expectedStages",
+    "timeoutSec",
     "assertions"
   ],
   "properties": {
@@ -25,6 +27,19 @@
     "complexity": { "enum": ["low", "medium", "high"] },
     "title": { "type": "string" },
     "kind": { "enum": ["allow", "constrain", "manual_rule_deny", "safe_agent_deny"] },
-    "command": { "type": "string" }
+    "command": { "type": "string" },
+    "deliverables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "kind", "description"],
+        "properties": {
+          "path": { "type": "string" },
+          "kind": { "enum": ["text", "json"] },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "timeoutSec": { "type": "integer", "minimum": 30, "maximum": 900 }
   }
 }
