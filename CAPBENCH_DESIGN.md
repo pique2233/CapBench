@@ -158,6 +158,91 @@ tasks/<layer>/<subcategory>/<core-task>/
 - 运行器可以自动扫描目录生成 registry，而不需要维护巨大的手写总表
 - 变体和核心任务的边界清楚，不会把“同题不同压力”混成“偷偷换题”
 
+## 3.2 单任务最低强制规范
+
+为了让后续任务可以批量生成、批量校验、批量复跑，单任务包需要遵守一套固定约束。
+
+### 3.2.1 必需目录与文件
+
+每个任务目录必须包含：
+
+- `task.json`
+- `instruction.md`
+- `seed/workspace/`
+- `variants/benign/variant.json`
+- `variants/ambiguous/variant.json`
+- `variants/adversarial_pressure/variant.json`
+
+其中：
+
+- `instruction.md` 必须存在且非空
+- `instruction.md` 是该任务唯一自然语言说明
+- runner 固定只认 `instruction.md`，不支持自定义说明文件名
+
+### 3.2.2 task.json 强制规则
+
+`task.json` 只允许承载结构化定义，不允许再回到旧格式。
+
+必须由 `task.json` 承担的内容：
+
+- 核心任务 ID
+- 层级与子类
+- 难度
+- 标题与简要描述
+- execution 定义
+- evaluator 断言
+
+`task.json` 禁止出现的旧字段：
+
+- `instruction`
+- `instructionPath`
+- `workspaceFiles`
+
+也就是说：
+
+- 自然语言任务说明只能在 `instruction.md`
+- 工作区初始资产只能放在 `seed/workspace/`
+- 不能再把整段 instruction 或整个 workspace 塞回 JSON
+
+### 3.2.3 variant 强制规则
+
+三个标准变体目录固定为：
+
+- `benign`
+- `ambiguous`
+- `adversarial_pressure`
+
+每个变体必须有 `variant.json`。
+
+变体允许做的事：
+
+- 在 `variants/<variant>/workspace/` 下增加压力文件
+- 调整该变体的标题后缀和压力说明
+
+变体不允许做的事：
+
+- 偷偷更换核心目标
+- 修改核心 command
+- 修改核心 expectedOutcome
+- 修改核心 expectedStages
+- 修改核心 assertions
+
+换句话说，variant 只能改变“环境压力”，不能改变“这道题本身是什么题”。
+
+### 3.2.4 Runner 侧校验原则
+
+在生成 registry 之前，runner 应当先对任务包做 fail-fast 校验。
+
+最小校验包括：
+
+- `instruction.md` 是否存在且非空
+- `seed/workspace/` 是否存在
+- 三个标准 variant 是否齐全
+- `variant.json` 中的 `variant` 字段是否与目录名一致
+- 是否残留旧格式字段或旧格式变体文件
+
+这样可以保证任务包一旦不规范，会在 registry 生成阶段立刻失败，而不是等到正式跑 benchmark 时才暴露问题。
+
 ## 4. 三个大类与十二个子类
 
 ### 4.1 Base Task

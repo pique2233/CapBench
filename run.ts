@@ -156,6 +156,7 @@ const NODE22_BIN = path.join(
 );
 const NODE22_BIN_DIR = path.dirname(NODE22_BIN);
 const DEFAULT_RUNSET = process.env.CAPBENCH_RUNSET ?? "smoke";
+const REQUIRED_VARIANTS: TaskVariant[] = ["benign", "ambiguous", "adversarial_pressure"];
 
 function round(value: number): number {
   return Math.round(value * 1000) / 1000;
@@ -163,6 +164,111 @@ function round(value: number): number {
 
 async function readJson<T>(filePath: string): Promise<T> {
   return JSON.parse(await fs.readFile(filePath, "utf8")) as T;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+async function getPathKind(filePath: string): Promise<"missing" | "file" | "directory" | "other"> {
+  try {
+    const stats = await fs.stat(filePath);
+    if (stats.isFile()) {
+      return "file";
+    }
+    if (stats.isDirectory()) {
+      return "directory";
+    }
+    return "other";
+  } catch {
+    return "missing";
+  }
+}
+
+async function assertPathKind(
+  filePath: string,
+  expected: "file" | "directory",
+  label: string,
+): Promise<void> {
+  const actual = await getPathKind(filePath);
+  if (actual !== expected) {
+    throw new Error(`${label} expected ${expected} but found ${actual}: ${filePath}`);
+  }
+}
+
+async function validateTaskPackage(taskFile: string): Promise<void> {
+  const taskDir = path.dirname(taskFile);
+  const instructionPath = path.join(taskDir, "instruction.md");
+  const seedWorkspaceDir = path.join(taskDir, "seed", "workspace");
+  const variantsDir = path.join(taskDir, "variants");
+
+  await assertPathKind(instructionPath, "file", "Task package instruction");
+  const instruction = await fs.readFile(instructionPath, "utf8");
+  if (instruction.trim().length === 0) {
+    throw new Error(`Task package instruction.md must be non-empty: ${instructionPath}`);
+  }
+
+  await assertPathKind(seedWorkspaceDir, "directory", "Task package seed workspace");
+  await assertPathKind(variantsDir, "directory", "Task package variants directory");
+
+  const rawTask = await readJson<unknown>(taskFile);
+  if (!isRecord(rawTask)) {
+    throw new Error(`Task file must contain a JSON object: ${taskFile}`);
+  }
+  if ("instruction" in rawTask || "instructionPath" in rawTask || "workspaceFiles" in rawTask) {
+    throw new Error(
+      `Legacy root fields are not allowed in task.json; use instruction.md and seed/workspace instead: ${taskFile}`,
+    );
+  }
+  if (isRecord(rawTask.execution) && "workspaceFiles" in rawTask.execution) {
+    throw new Error(
+      `Legacy execution.workspaceFiles is not allowed; use seed/workspace instead: ${taskFile}`,
+    );
+  }
+
+  const legacyVariantFiles = await Promise.all(
+    REQUIRED_VARIANTS.map(async (variant) => ({
+      variant,
+      kind: await getPathKind(path.join(variantsDir, `${variant}.json`)),
+    })),
+  );
+  const presentLegacyVariantFiles = legacyVariantFiles
+    .filter((entry) => entry.kind !== "missing")
+    .map((entry) => `${entry.variant}.json`);
+  if (presentLegacyVariantFiles.length > 0) {
+    throw new Error(
+      `Legacy flat variant files are not allowed in ${variantsDir}: ${presentLegacyVariantFiles.join(", ")}`,
+    );
+  }
+
+  const variantEntries = (await fs.readdir(variantsDir, { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+  const missingVariants = REQUIRED_VARIANTS.filter((variant) => !variantEntries.includes(variant));
+  const extraVariants = variantEntries.filter(
+    (entry) => !REQUIRED_VARIANTS.includes(entry as TaskVariant),
+  );
+  if (missingVariants.length > 0 || extraVariants.length > 0) {
+    const details = [
+      missingVariants.length > 0 ? `missing: ${missingVariants.join(", ")}` : null,
+      extraVariants.length > 0 ? `extra: ${extraVariants.join(", ")}` : null,
+    ]
+      .filter(Boolean)
+      .join("; ");
+    throw new Error(`Task package variants must be exactly ${REQUIRED_VARIANTS.join(", ")} (${details})`);
+  }
+
+  for (const variant of REQUIRED_VARIANTS) {
+    const variantJsonPath = path.join(variantsDir, variant, "variant.json");
+    await assertPathKind(variantJsonPath, "file", `Variant manifest for ${variant}`);
+    const variantOverlay = await readJson<unknown>(variantJsonPath);
+    if (!isRecord(variantOverlay) || variantOverlay.variant !== variant) {
+      throw new Error(
+        `Variant manifest must declare variant=${variant}: ${variantJsonPath}`,
+      );
+    }
+  }
 }
 
 function toJsonl(records: object[]): string {
@@ -235,6 +341,7 @@ async function generateRegistry(): Promise<{
   const instances: InstanceSpec[] = [];
 
   for (const taskFile of taskFiles) {
+    await validateTaskPackage(taskFile);
     const taskDir = path.dirname(taskFile);
     const task = await readJson<CoreTaskDefinition>(taskFile);
     const variantsDir = path.join(taskDir, "variants");
