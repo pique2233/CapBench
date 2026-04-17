@@ -15,12 +15,6 @@ type TaskLayer = "base" | "control" | "threat";
 type TaskVariant = "benign" | "ambiguous" | "adversarial_pressure";
 type ExecutionKind = "allow" | "constrain" | "manual_rule_deny" | "safe_agent_deny";
 
-type WorkspaceFile = {
-  path: string;
-  content: string;
-  executable?: boolean;
-};
-
 type FileContainsAssertion = {
   path: string;
   contains: string[];
@@ -49,11 +43,12 @@ type InstanceSpec = {
   description: string;
   taskPath: string;
   instructionPath: string;
+  seedWorkspaceDir: string;
+  variantWorkspaceDir: string | null;
   kind: ExecutionKind;
   command: string;
   expectedOutcome: "completed" | "blocked";
   expectedStages: string[];
-  workspaceFiles: WorkspaceFile[];
   allowedWritePaths: string[];
   assertions: TaskAssertions;
 };
@@ -84,6 +79,7 @@ type JsonObject = Record<string, unknown>;
 
 const runDir = process.env.CAPCLAW_BENCH_RUN_DIR;
 const instanceRegistryPath = process.env.CAPBENCH_INSTANCE_REGISTRY;
+const benchRoot = process.env.CAPBENCH_ROOT;
 
 if (!runDir) {
   throw new Error("CAPCLAW_BENCH_RUN_DIR is required");
@@ -91,6 +87,10 @@ if (!runDir) {
 
 if (!instanceRegistryPath) {
   throw new Error("CAPBENCH_INSTANCE_REGISTRY is required");
+}
+
+if (!benchRoot) {
+  throw new Error("CAPBENCH_ROOT is required");
 }
 
 const instances = JSON.parse(fs.readFileSync(instanceRegistryPath, "utf8")) as InstanceSpec[];
@@ -219,15 +219,11 @@ async function createWorkspace(taskId: string): Promise<string> {
   return workspaceRoot;
 }
 
-async function materializeWorkspace(root: string, files: WorkspaceFile[]): Promise<void> {
-  for (const file of files) {
-    const absolutePath = path.join(root, file.path);
-    await fsp.mkdir(path.dirname(absolutePath), { recursive: true });
-    await fsp.writeFile(absolutePath, file.content, "utf8");
-    if (file.executable) {
-      await fsp.chmod(absolutePath, 0o755);
-    }
+async function copyDirIfExists(source: string, destination: string): Promise<void> {
+  if (!(await exists(source))) {
+    return;
   }
+  await fsp.cp(source, destination, { recursive: true });
 }
 
 async function writeResult(taskId: string, result: TaskResult): Promise<void> {
@@ -259,7 +255,14 @@ function defaultStatusForOutcome(expectedOutcome: "completed" | "blocked"): stri
 
 async function executeInstance(instance: InstanceSpec): Promise<TaskResult> {
   const workspaceRoot = await createWorkspace(instance.id);
-  await materializeWorkspace(workspaceRoot, instance.workspaceFiles);
+  const seedWorkspaceDir = path.resolve(benchRoot, instance.seedWorkspaceDir);
+  const variantWorkspaceDir = instance.variantWorkspaceDir
+    ? path.resolve(benchRoot, instance.variantWorkspaceDir)
+    : null;
+  await copyDirIfExists(seedWorkspaceDir, workspaceRoot);
+  if (variantWorkspaceDir) {
+    await copyDirIfExists(variantWorkspaceDir, workspaceRoot);
+  }
   const allowedWritePaths = absoluteWritePaths(workspaceRoot, instance.allowedWritePaths);
   let safeAgentCalls = 0;
 

@@ -9,7 +9,6 @@
     "complexity",
     "title",
     "description",
-    "instruction",
     "execution"
   ],
   "properties": {
@@ -19,7 +18,6 @@
     "complexity": { "enum": ["low", "medium", "high"] },
     "title": { "type": "string" },
     "description": { "type": "string" },
-    "instruction": { "type": "string" },
     "execution": {
       "type": "object",
       "required": ["kind", "command", "expectedOutcome", "expectedStages", "assertions"],

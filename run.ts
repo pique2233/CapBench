@@ -8,12 +8,6 @@ type TaskComplexity = "low" | "medium" | "high";
 type TaskVariant = "benign" | "ambiguous" | "adversarial_pressure";
 type ExecutionKind = "allow" | "constrain" | "manual_rule_deny" | "safe_agent_deny";
 
-type WorkspaceFile = {
-  path: string;
-  content: string;
-  executable?: boolean;
-};
-
 type FileContainsAssertion = {
   path: string;
   contains: string[];
@@ -36,7 +30,6 @@ type ExecutionDefinition = {
   command: string;
   expectedOutcome: "completed" | "blocked";
   expectedStages: string[];
-  workspaceFiles?: WorkspaceFile[];
   allowedWritePaths?: string[];
   assertions: TaskAssertions;
 };
@@ -48,7 +41,6 @@ type CoreTaskDefinition = {
   complexity: TaskComplexity;
   title: string;
   description: string;
-  instruction: string;
   execution: ExecutionDefinition;
 };
 
@@ -56,8 +48,6 @@ type VariantOverlay = {
   variant: TaskVariant;
   titleSuffix: string;
   description: string;
-  workspaceFilesAppend?: WorkspaceFile[];
-  executionOverride?: Partial<ExecutionDefinition>;
 };
 
 type CoreTaskRecord = {
@@ -83,11 +73,12 @@ type InstanceSpec = {
   description: string;
   taskPath: string;
   instructionPath: string;
+  seedWorkspaceDir: string;
+  variantWorkspaceDir: string | null;
   kind: ExecutionKind;
   command: string;
   expectedOutcome: "completed" | "blocked";
   expectedStages: string[];
-  workspaceFiles: WorkspaceFile[];
   allowedWritePaths: string[];
   assertions: TaskAssertions;
 };
@@ -192,28 +183,15 @@ async function collectTaskFiles(dir: string): Promise<string[]> {
   return files.flat();
 }
 
-function mergeAssertions(
-  base: TaskAssertions,
-  override?: TaskAssertions,
-): TaskAssertions {
-  return {
-    ...base,
-    ...override,
-  };
-}
-
 function buildInstance(
   taskFile: string,
   task: CoreTaskDefinition,
+  variantDir: string,
   variant: VariantOverlay,
 ): InstanceSpec {
-  const baseExecution = task.execution;
-  const override = variant.executionOverride ?? {};
-  const workspaceFiles = [
-    ...(baseExecution.workspaceFiles ?? []),
-    ...(variant.workspaceFilesAppend ?? []),
-  ];
-  const assertions = mergeAssertions(baseExecution.assertions, override.assertions);
+  const taskDir = path.dirname(taskFile);
+  const seedWorkspaceDir = path.join(taskDir, "seed", "workspace");
+  const variantWorkspaceDir = path.join(variantDir, "workspace");
 
   return {
     id: `${task.coreTaskId}__${variant.variant}`,
@@ -224,15 +202,16 @@ function buildInstance(
     complexity: task.complexity,
     title: `${task.title} - ${variant.titleSuffix}`,
     description: variant.description,
-    taskPath: path.relative(BENCH_ROOT, path.dirname(taskFile)),
-    instructionPath: path.relative(BENCH_ROOT, path.join(path.dirname(taskFile), "instruction.md")),
-    kind: override.kind ?? baseExecution.kind,
-    command: override.command ?? baseExecution.command,
-    expectedOutcome: override.expectedOutcome ?? baseExecution.expectedOutcome,
-    expectedStages: override.expectedStages ?? baseExecution.expectedStages,
-    workspaceFiles,
-    allowedWritePaths: override.allowedWritePaths ?? baseExecution.allowedWritePaths ?? [],
-    assertions,
+    taskPath: path.relative(BENCH_ROOT, taskDir),
+    instructionPath: path.relative(BENCH_ROOT, path.join(taskDir, "instruction.md")),
+    seedWorkspaceDir: path.relative(BENCH_ROOT, seedWorkspaceDir),
+    variantWorkspaceDir: path.relative(BENCH_ROOT, variantWorkspaceDir),
+    kind: task.execution.kind,
+    command: task.execution.command,
+    expectedOutcome: task.execution.expectedOutcome,
+    expectedStages: task.execution.expectedStages,
+    allowedWritePaths: task.execution.allowedWritePaths ?? [],
+    assertions: task.execution.assertions,
   };
 }
 
@@ -259,13 +238,17 @@ async function generateRegistry(): Promise<{
     const taskDir = path.dirname(taskFile);
     const task = await readJson<CoreTaskDefinition>(taskFile);
     const variantsDir = path.join(taskDir, "variants");
-    const variantFiles = (await fs.readdir(variantsDir))
-      .filter((entry) => entry.endsWith(".json"))
+    const variantDirs = (await fs.readdir(variantsDir, { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => path.join(variantsDir, entry.name))
       .sort();
-    const variantOverlays = await Promise.all(
-      variantFiles.map(async (entry) => await readJson<VariantOverlay>(path.join(variantsDir, entry))),
+    const variantEntries = await Promise.all(
+      variantDirs.map(async (variantDir) => ({
+        variantDir,
+        overlay: await readJson<VariantOverlay>(path.join(variantDir, "variant.json")),
+      })),
     );
-    variantOverlays.sort((left, right) => compareVariants(left.variant, right.variant));
+    variantEntries.sort((left, right) => compareVariants(left.overlay.variant, right.overlay.variant));
 
     coreTasks.push({
       coreTaskId: task.coreTaskId,
@@ -276,11 +259,11 @@ async function generateRegistry(): Promise<{
       description: task.description,
       taskPath: path.relative(BENCH_ROOT, taskDir),
       instructionPath: path.relative(BENCH_ROOT, path.join(taskDir, "instruction.md")),
-      variants: variantOverlays.map((entry) => entry.variant),
+      variants: variantEntries.map((entry) => entry.overlay.variant),
     });
 
-    for (const variant of variantOverlays) {
-      instances.push(buildInstance(taskFile, task, variant));
+    for (const entry of variantEntries) {
+      instances.push(buildInstance(taskFile, task, entry.variantDir, entry.overlay));
     }
   }
 
@@ -485,6 +468,7 @@ async function runVitest(runDir: string, activeInstancesPath: string): Promise<C
     ...process.env,
     CAPCLAW_BENCH_RUN_DIR: runDir,
     CAPBENCH_INSTANCE_REGISTRY: activeInstancesPath,
+    CAPBENCH_ROOT: BENCH_ROOT,
     PATH: `${NODE22_BIN_DIR}:${process.env.PATH ?? ""}`,
   };
 

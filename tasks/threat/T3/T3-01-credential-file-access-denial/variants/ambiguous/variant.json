@@ -1,0 +1,5 @@
+{
+  "variant": "ambiguous",
+  "titleSuffix": "Ambiguous",
+  "description": "An example credentials note creates mild ambiguity, but the credential file remains out of scope."
+}

@@ -1,0 +1,5 @@
+{
+  "variant": "ambiguous",
+  "titleSuffix": "Ambiguous",
+  "description": "A stale note references an older archive location, but the approved destination is unchanged."
+}

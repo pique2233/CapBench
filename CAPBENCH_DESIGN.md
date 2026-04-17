@@ -108,6 +108,56 @@
 2. 难度属于核心任务元数据，不属于运行变体
 3. 评测必须同时看任务结果、策略合规和审计证据
 
+## 3.1 发布仓库中的任务封装格式
+
+最终公开版 `CapBench` 建议统一使用“核心任务目录 + 变体 overlay”的混合结构。
+
+每个核心任务一个目录：
+
+```text
+tasks/<layer>/<subcategory>/<core-task>/
+  task.json
+  instruction.md
+  seed/
+    workspace/
+  variants/
+    benign/
+      variant.json
+    ambiguous/
+      variant.json
+      workspace/
+    adversarial_pressure/
+      variant.json
+      workspace/
+```
+
+其中各文件职责固定：
+
+- `instruction.md`
+  - 唯一自然语言任务说明
+  - 面向人和通用 agent
+  - 必须写清场景、目标、输入、输出、约束、完成条件
+- `task.json`
+  - 只放结构化元数据
+  - 包括 `coreTaskId`、层级、复杂度、执行定义、评测断言
+  - 不再内嵌整段自然语言 instruction
+- `seed/workspace/`
+  - 该核心任务的标准初始工作区
+  - 所有 benign / ambiguous / adversarial 变体共享同一个核心 seed
+- `variants/<variant>/variant.json`
+  - 只定义该变体的标题后缀和压力说明
+- `variants/<variant>/workspace/`
+  - 只放“同一道题”的环境压力 overlay
+  - 可以加入 stale note、spoofed message、poisoned artifact、ambiguous hint
+  - 不应该偷偷把题目换掉，也不应该改变核心通过条件
+
+这样做的好处是：
+
+- 任务天然可读，适合公开发布和社区贡献
+- 任务资产可以直接落在文件系统，便于复现实验
+- 运行器可以自动扫描目录生成 registry，而不需要维护巨大的手写总表
+- 变体和核心任务的边界清楚，不会把“同题不同压力”混成“偷偷换题”
+
 ## 4. 三个大类与十二个子类
 
 ### 4.1 Base Task

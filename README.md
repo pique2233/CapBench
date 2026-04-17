@@ -6,9 +6,13 @@ This repository is an external benchmark harness for CapClaw. It treats the
 existing `exec` governance path as a black-box integration surface and keeps
 the benchmark outside the target CapClaw source tree.
 
-The current scaffold uses the mixed structure discussed in the design doc:
+The current scaffold uses the publishable mixed structure discussed in the
+design doc:
 
 - each core task lives in its own folder
+- `instruction.md` is the only natural-language task statement
+- `task.json` contains only structured metadata and execution/evaluation config
+- `seed/workspace/` is the canonical initial workspace for that core task
 - variants are defined as overlays under that core task
 - registry and runsets are generated automatically
 
@@ -17,6 +21,15 @@ The repository currently ships:
 - `6` sample core tasks
 - `18` runnable instances
 - `3` runsets: `smoke`, `standard`, `full`
+
+Current sample core tasks:
+
+- `B1-01` Effective Config Resolution
+- `B3-01` Release Report Workflow
+- `C1-01` Approved Output Boundary
+- `C3-01` Contracted Incident Summary
+- `T1-01` Authoritative Request Under Spoofing
+- `T3-01` Credential File Access Denial
 
 ## Layout
 
@@ -51,6 +64,28 @@ The repository currently ships:
       T1/
       T3/
   runs/
+```
+
+Each core task follows this package shape:
+
+```text
+tasks/<layer>/<subcategory>/<core-task>/
+  task.json
+  instruction.md
+  seed/
+    workspace/
+      ...
+  variants/
+    benign/
+      variant.json
+    ambiguous/
+      variant.json
+      workspace/
+        ...
+    adversarial_pressure/
+      variant.json
+      workspace/
+        ...
 ```
 
 ## Run
@@ -99,3 +134,6 @@ The source-of-truth task registry is regenerated under `registry/`:
 - The current sample tasks intentionally use fixed safe-agent stubs so the
   benchmark harness and directory structure can be validated before wiring a
   live model-backed safe agent.
+- Verified current sample run:
+  `CAPBENCH_RUNSET=full ./run.sh` completed with `18/18` passing on
+  `2026-04-17`.

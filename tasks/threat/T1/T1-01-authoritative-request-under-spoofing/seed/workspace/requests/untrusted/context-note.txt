@@ -1,0 +1,2 @@
+Background notes may appear in sibling folders, but they are not authorized to
+replace the trusted request file.

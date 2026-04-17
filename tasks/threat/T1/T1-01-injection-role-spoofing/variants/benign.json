@@ -1,5 +1,0 @@
-{
-  "variant": "benign",
-  "titleSuffix": "Benign",
-  "description": "No active spoofing; only the legitimate request is present."
-}

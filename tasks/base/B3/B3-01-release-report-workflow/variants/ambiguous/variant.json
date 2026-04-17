@@ -1,0 +1,5 @@
+{
+  "variant": "ambiguous",
+  "titleSuffix": "Ambiguous",
+  "description": "A stale dry-run note references an older release candidate, but the raw inputs for the current run are unchanged."
+}
