@@ -128,9 +128,10 @@ production. The intended flow is:
 
 1. choose `layer`, `subcategory`, and `complexity`
 2. paste a short natural-language brief
-3. generate a full task package directly into `tasks/`
-4. auto-refresh `registry/`
-5. auto-run structural review
+3. either queue the request for Codex or run the fallback local generator
+4. generate a full task package directly into `tasks/`
+5. auto-refresh `registry/`
+6. auto-run structural review
 
 Start the studio:
 
@@ -139,6 +140,15 @@ node authoring/server.mjs
 ```
 
 Then open `http://127.0.0.1:4318`.
+
+If you want live Codex-authored generation instead of the fallback builder,
+use the UI button `Queue For Codex`. That writes a batch under:
+
+```text
+authoring/intake/pending/
+```
+
+Then ask Codex in this thread to consume the pending intake batches.
 
 Run the built-in demo batch for the three current authoring examples:
 

@@ -16,6 +16,9 @@
             Choose the layer, subcategory, and difficulty. Describe the task in one paragraph. The studio turns it into a
             publishable task package with `instruction.md`, `task.json`, `seed/workspace`, variants, registry refresh, and review.
           </p>
+          <p class="mode-note">
+            Two modes are available: queue requests for Codex consumption, or run the deterministic fallback generator locally.
+          </p>
           <div class="hero-actions">
             <button id="add-request-button" class="primary">Add Request</button>
             <button id="load-demo-button" class="ghost">Load Demo Trio</button>
@@ -41,20 +44,22 @@
         <div class="panel intake">
           <div class="panel-header">
             <h2>Batch Intake</h2>
-            <p>Queue one or many requests, then generate them together.</p>
+            <p>Queue one or many requests for Codex, or run the fallback generator locally.</p>
           </div>
           <div id="request-list" class="request-list"></div>
           <div class="panel-footer">
-            <button id="generate-button" class="primary">Generate Batch</button>
+            <button id="enqueue-button" class="primary">Queue For Codex</button>
+            <button id="generate-button" class="ghost">Fallback Generate</button>
           </div>
         </div>
 
         <div class="panel output">
           <div class="panel-header">
             <h2>Generator Output</h2>
-            <p>TaskSpec summary, write location, registry refresh status, and review findings.</p>
+            <p>Queue status, task package summary, write location, registry refresh status, and review findings.</p>
           </div>
           <div id="status-banner" class="status-banner idle">Waiting for requests.</div>
+          <div id="pending-banner" class="pending-banner">Pending Codex intake: loading...</div>
           <div id="result-list" class="result-list"></div>
         </div>
       </section>

@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import { groupCatalogByLayer, SUBCATEGORY_CATALOG } from "./lib/catalog.mjs";
 import { generateBatch } from "./lib/generator.mjs";
+import { listPendingBatches, queueBatch } from "./lib/intake.mjs";
 import { reviewTaskPackage } from "./lib/review.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -96,6 +97,23 @@ const server = http.createServer(async (request, response) => {
       return json(response, 200, result);
     }
 
+    if (request.method === "POST" && url.pathname === "/api/enqueue-batch") {
+      const body = await readBody(request);
+      validateRequests(body.requests);
+      const queued = await queueBatch({
+        benchRoot,
+        requests: body.requests,
+      });
+      const pending = await listPendingBatches(benchRoot);
+      return json(response, 200, {
+        ok: true,
+        queued,
+        pending,
+        nextStep:
+          "Ask Codex to consume the pending intake batch and generate publishable task packages.",
+      });
+    }
+
     if (request.method === "POST" && url.pathname === "/api/review") {
       const body = await readBody(request);
       if (typeof body.taskDir !== "string" || body.taskDir.trim().length === 0) {
@@ -106,7 +124,13 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.method === "GET" && url.pathname === "/api/health") {
-      return json(response, 200, { ok: true, port, benchRoot });
+      const pending = await listPendingBatches(benchRoot);
+      return json(response, 200, { ok: true, port, benchRoot, pending });
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/intake") {
+      const pending = await listPendingBatches(benchRoot);
+      return json(response, 200, pending);
     }
 
     return await serveStatic(url.pathname, response);

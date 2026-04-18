@@ -1,3 +1,5 @@
 .DS_Store
 runs/
 authoring/history/*.json
+authoring/intake/pending/*.json
+authoring/intake/processed/*.json

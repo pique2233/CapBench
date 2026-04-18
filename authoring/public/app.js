@@ -1,3 +1,4 @@
+(async () => {
 const catalogResponse = await fetch("/api/catalog");
 const catalogPayload = await catalogResponse.json();
 
@@ -7,6 +8,7 @@ const allSubcategories = catalogPayload.subcategories;
 const requestList = document.getElementById("request-list");
 const resultList = document.getElementById("result-list");
 const statusBanner = document.getElementById("status-banner");
+const pendingBanner = document.getElementById("pending-banner");
 const requestTemplate = document.getElementById("request-template");
 const resultTemplate = document.getElementById("result-template");
 
@@ -140,6 +142,26 @@ function renderResults(payload) {
   });
 }
 
+async function refreshPendingBanner() {
+  const response = await fetch("/api/intake");
+  const payload = await response.json();
+  if (!response.ok) {
+    pendingBanner.textContent = "Pending Codex intake: unavailable";
+    pendingBanner.className = "pending-banner warning";
+    return;
+  }
+
+  if (payload.pendingCount === 0) {
+    pendingBanner.textContent = "Pending Codex intake: 0 batches";
+    pendingBanner.className = "pending-banner";
+    return;
+  }
+
+  const latest = payload.batches[payload.batches.length - 1];
+  pendingBanner.textContent = `Pending Codex intake: ${payload.pendingCount} batches. Latest: ${latest.batchId} (${latest.requestCount} requests)`;
+  pendingBanner.className = "pending-banner active";
+}
+
 document.getElementById("add-request-button").addEventListener("click", () => {
   createRequestCard();
 });
@@ -176,6 +198,39 @@ document.getElementById("generate-button").addEventListener("click", async () =>
   statusBanner.textContent = `Generated ${payload.results.length} task packages. Registry core tasks: ${payload.registry?.coreTaskCount ?? "n/a"}, instances: ${payload.registry?.instanceCount ?? "n/a"}. History: ${payload.history}`;
   statusBanner.className = "status-banner success";
   renderResults(payload);
+  await refreshPendingBanner();
+});
+
+document.getElementById("enqueue-button").addEventListener("click", async () => {
+  const requests = readRequests();
+  if (requests.length === 0) {
+    statusBanner.textContent = "Add at least one request before queueing.";
+    statusBanner.className = "status-banner warning";
+    return;
+  }
+
+  statusBanner.textContent = "Queueing intake batch for Codex consumption...";
+  statusBanner.className = "status-banner busy";
+
+  const response = await fetch("/api/enqueue-batch", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ requests }),
+  });
+  const payload = await response.json();
+
+  if (!response.ok) {
+    statusBanner.textContent = payload.error ?? "Queueing failed.";
+    statusBanner.className = "status-banner warning";
+    return;
+  }
+
+  statusBanner.textContent = `Queued ${payload.queued.requestCount} requests for Codex. Batch: ${payload.queued.batchId}. Next step: ask Codex to consume pending intake.`;
+  statusBanner.className = "status-banner success";
+  resultList.innerHTML = "";
+  await refreshPendingBanner();
 });
 
 defaultRequests.forEach((request) => createRequestCard(request));
+refreshPendingBanner();
+})();

@@ -12,6 +12,15 @@ It is designed for the workflow agreed in the benchmark design:
 6. the generated package is reviewed immediately
 
 The studio does **not** require editing `task.json` by hand.
+It now supports two operating modes:
+
+1. `Queue For Codex`
+   The web UI writes a structured intake batch into `authoring/intake/pending/`.
+   This is the mode to use when you want the live Codex agent in this thread to
+   consume the batch and generate publishable tasks.
+2. `Fallback Generate`
+   The local deterministic builder writes tasks immediately. This is still useful
+   for offline scaffolding, but it is not the same as Codex-authored generation.
 The current implementation uses deterministic task builders keyed by the
 selected subcategory family, so generated tasks always land on the fixed
 publishable package contract instead of an ad hoc free-form draft.
@@ -27,6 +36,15 @@ Then open:
 ```text
 http://127.0.0.1:4318
 ```
+
+Recommended interactive workflow:
+
+1. Open the web UI.
+2. Fill in `layer`, `subcategory`, `complexity`, and the natural-language brief.
+3. Click `Queue For Codex`.
+4. In this Codex thread, say:
+   `consume all pending intake batches under authoring/intake/pending`
+5. Codex reads the queued requests and writes the final task packages into `tasks/`.
 
 ## Generate A Demo Batch
 
@@ -44,6 +62,8 @@ This generates one sample task in each of the three top-level layers:
 
 - `GET /api/health`
 - `GET /api/catalog`
+- `GET /api/intake`
+- `POST /api/enqueue-batch`
 - `POST /api/generate-batch`
 - `POST /api/review`
 
@@ -89,3 +109,9 @@ authoring/history/
 ```
 
 These history files are runtime artifacts and do not need to be committed.
+
+Queued Codex intake batches are written to:
+
+```text
+authoring/intake/pending/
+```

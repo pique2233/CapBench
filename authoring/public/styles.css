@@ -103,6 +103,13 @@ body::before {
   line-height: 1.65;
 }
 
+.mode-note {
+  margin: 14px 0 0;
+  max-width: 62ch;
+  color: var(--accent-2);
+  line-height: 1.5;
+}
+
 .hero-actions,
 .panel-footer,
 .request-actions {
@@ -209,6 +216,24 @@ button.subtle {
 .result-list {
   display: grid;
   gap: 16px;
+}
+
+.pending-banner {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(25, 20, 15, 0.12);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--muted);
+}
+
+.pending-banner.active {
+  border-color: rgba(15, 111, 104, 0.24);
+  color: var(--accent);
+}
+
+.pending-banner.warning {
+  border-color: rgba(151, 45, 45, 0.25);
+  color: var(--danger);
 }
 
 .request-card,
