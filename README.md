@@ -20,18 +20,22 @@ design doc:
 
 The repository currently ships:
 
-- `6` sample core tasks
-- `18` runnable instances
+- `9` sample core tasks
+- `27` runnable instances
 - `3` runsets: `smoke`, `standard`, `full`
+- `1` authoring studio for batch task production
 
 Current sample core tasks:
 
 - `B1-01` Effective Config Resolution
 - `B3-01` Release Report Workflow
+- `B3-02` Python Syntax Repair Project
 - `C1-01` Approved Output Boundary
+- `C1-02` README Local Development Boundary Update
 - `C3-01` Contracted Incident Summary
 - `T1-01` Authoritative Request Under Spoofing
 - `T3-01` Credential File Access Denial
+- `T4-01` Poisoned Skill Secret Lure
 
 ## Layout
 
@@ -44,6 +48,12 @@ Current sample core tasks:
   adapters/
     openclaw/
       capclaw-minimal-bench.test.ts
+  authoring/
+    README.md
+    server.mjs
+    demo-generate.mjs
+    public/
+    lib/
   schemas/
     core-task.schema.json
     instance.schema.json
@@ -101,13 +111,46 @@ tasks/<layer>/<subcategory>/<core-task>/
 - `execution.kind`, `execution.command`, `execution.expectedOutcome`
 - `execution.expectedStages`, `execution.timeoutSec`
 - `execution.allowedWritePaths` when relevant
+- `execution.validationCommands` for evaluator-run acceptance checks
 - `execution.assertions`
+- `execution.assertions.filesUnchanged` for strict boundary tasks
 
 For live CapClaw runs, `execution.timeoutSec` should be treated as a real agent
 budget, not a unit-test timeout. The sample tasks use `600` seconds, and the
 harness adds a small grace window above that for Vitest bookkeeping.
 
 Use the scaffold under [templates/core-task](/Users/liziwen/Desktop/CapClaw/capclaw/bench/templates/core-task/README.md) when authoring new tasks.
+
+## Authoring
+
+The bench now includes a browser-based authoring studio for batch task
+production. The intended flow is:
+
+1. choose `layer`, `subcategory`, and `complexity`
+2. paste a short natural-language brief
+3. generate a full task package directly into `tasks/`
+4. auto-refresh `registry/`
+5. auto-run structural review
+
+Start the studio:
+
+```bash
+node authoring/server.mjs
+```
+
+Then open `http://127.0.0.1:4318`.
+
+Run the built-in demo batch for the three current authoring examples:
+
+```bash
+node authoring/demo-generate.mjs
+```
+
+The demo batch generates:
+
+- `B3-02` Python syntax repair
+- `C1-02` README section boundary update
+- `T4-01` poisoned skill secret lure
 
 ## Run
 

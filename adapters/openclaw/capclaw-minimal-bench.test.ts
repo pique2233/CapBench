@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import fsp from "node:fs/promises";
+import { spawn } from "node:child_process";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -36,6 +37,13 @@ type DeliverableDefinition = {
   description: string;
 };
 
+type ValidationCommand = {
+  command: string;
+  expectedExitCode: number;
+  outputContains?: string[];
+  outputExcludes?: string[];
+};
+
 type TaskAssertions = {
   outputContains?: string[];
   outputExcludes?: string[];
@@ -46,6 +54,7 @@ type TaskAssertions = {
   manualRuleDeny?: boolean;
   observedStatus?: string;
   observedDecision?: string;
+  filesUnchanged?: string[];
   stageExcludes?: string[];
 };
 
@@ -69,6 +78,7 @@ type InstanceSpec = {
   expectedStages: string[];
   timeoutSec: number;
   allowedWritePaths: string[];
+  validationCommands: ValidationCommand[];
   assertions: TaskAssertions;
 };
 
@@ -101,6 +111,7 @@ type TaskResult = {
 };
 
 type JsonObject = Record<string, unknown>;
+type FileSnapshot = Map<string, Buffer | null>;
 
 type AgentResult = {
   payloads?: Array<{ text?: string; isError?: boolean }>;
@@ -245,6 +256,78 @@ async function fileJsonFieldsMatch(root: string, assertion: FileJsonFieldsAssert
   }
 }
 
+async function snapshotFiles(root: string, relativePaths: string[]): Promise<FileSnapshot> {
+  const snapshot: FileSnapshot = new Map();
+  for (const relativePath of relativePaths) {
+    const absolutePath = path.join(root, relativePath);
+    if (!(await exists(absolutePath))) {
+      snapshot.set(relativePath, null);
+      continue;
+    }
+    snapshot.set(relativePath, await fsp.readFile(absolutePath));
+  }
+  return snapshot;
+}
+
+type ValidationResult = {
+  exitCode: number | null;
+  stdout: string;
+  stderr: string;
+  timedOut: boolean;
+};
+
+async function runValidationCommand(
+  root: string,
+  validationCommand: ValidationCommand,
+  timeoutMs: number,
+): Promise<ValidationResult> {
+  return await new Promise((resolve, reject) => {
+    const child = spawn(validationCommand.command, {
+      cwd: root,
+      env: process.env,
+      shell: true,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+
+    let stdout = "";
+    let stderr = "";
+    let settled = false;
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill("SIGTERM");
+    }, timeoutMs);
+
+    child.stdout.on("data", (chunk) => {
+      stdout += String(chunk);
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+    child.on("error", (error) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timer);
+      reject(error);
+    });
+    child.on("close", (code) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timer);
+      resolve({
+        exitCode: code,
+        stdout,
+        stderr,
+        timedOut,
+      });
+    });
+  });
+}
+
 function collectPayloadText(payloads: AgentResult["payloads"]): string {
   return (payloads ?? [])
     .map((payload) => payload.text?.trim())
@@ -345,6 +428,7 @@ async function executeInstance(instance: InstanceSpec): Promise<TaskResult> {
   if (variantWorkspaceDir) {
     await copyDirIfExists(variantWorkspaceDir, workspaceRoot);
   }
+  const unchangedSnapshot = await snapshotFiles(workspaceRoot, instance.assertions.filesUnchanged ?? []);
 
   const instruction = await fsp.readFile(path.resolve(benchRoot, instance.instructionPath), "utf8");
   const prompt = buildAgentPrompt(instance, instruction);
@@ -452,6 +536,56 @@ async function executeInstance(instance: InstanceSpec): Promise<TaskResult> {
   for (const assertion of instance.assertions.fileJsonFields ?? []) {
     if (!(await fileJsonFieldsMatch(workspaceRoot, assertion))) {
       notes.push(`Expected JSON field contract missing: ${assertion.path}`);
+    }
+  }
+  for (const [relativePath, beforeContent] of unchangedSnapshot.entries()) {
+    const absolutePath = path.join(workspaceRoot, relativePath);
+    const existsNow = await exists(absolutePath);
+    if (beforeContent === null) {
+      if (existsNow) {
+        notes.push(`File should have remained absent but was created: ${relativePath}`);
+      }
+      continue;
+    }
+    if (!existsNow) {
+      notes.push(`File should have remained unchanged but was removed: ${relativePath}`);
+      continue;
+    }
+    const afterContent = await fsp.readFile(absolutePath);
+    if (!beforeContent.equals(afterContent)) {
+      notes.push(`File changed but was declared unchanged: ${relativePath}`);
+    }
+  }
+  for (const validationCommand of instance.validationCommands) {
+    try {
+      const validationResult = await runValidationCommand(
+        workspaceRoot,
+        validationCommand,
+        instance.timeoutSec * 1000,
+      );
+      const validationOutput = `${validationResult.stdout}\n${validationResult.stderr}`;
+      if (validationResult.timedOut) {
+        notes.push(`Validation command timed out: ${validationCommand.command}`);
+      }
+      if (validationResult.exitCode !== validationCommand.expectedExitCode) {
+        notes.push(
+          `Validation command exit code mismatch for "${validationCommand.command}": expected ${validationCommand.expectedExitCode}, got ${validationResult.exitCode ?? "null"}.`,
+        );
+      }
+      for (const token of validationCommand.outputContains ?? []) {
+        if (!containsToken(validationOutput, token)) {
+          notes.push(`Validation command missing expected output token: ${token}`);
+        }
+      }
+      for (const token of validationCommand.outputExcludes ?? []) {
+        if (containsToken(validationOutput, token)) {
+          notes.push(`Validation command exposed forbidden output token: ${token}`);
+        }
+      }
+    } catch (error) {
+      notes.push(
+        `Validation command failed to start (${validationCommand.command}): ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
   if (instance.assertions.attenuationSeen && !attenuationSeen) {

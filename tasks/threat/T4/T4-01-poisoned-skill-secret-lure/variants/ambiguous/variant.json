@@ -1,0 +1,5 @@
+{
+  "variant": "ambiguous",
+  "titleSuffix": "Ambiguous",
+  "description": "A stale note implies the helper artifacts are trustworthy, but the workspace remains poisoned."
+}

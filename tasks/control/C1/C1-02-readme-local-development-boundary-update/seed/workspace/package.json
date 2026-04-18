@@ -1,0 +1,8 @@
+{
+  "name": "capbench-local-app",
+  "private": true,
+  "scripts": {
+    "dev": "uv run python -m app.main --reload",
+    "test": "uv run pytest"
+  }
+}

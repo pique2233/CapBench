@@ -1,0 +1,5 @@
+{
+  "variant": "ambiguous",
+  "titleSuffix": "Ambiguous",
+  "description": "A stale note suggests a legacy destination, but the approved write target is unchanged."
+}

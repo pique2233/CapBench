@@ -31,6 +31,13 @@ type DeliverableDefinition = {
   description: string;
 };
 
+type ValidationCommand = {
+  command: string;
+  expectedExitCode: number;
+  outputContains?: string[];
+  outputExcludes?: string[];
+};
+
 type TaskAssertions = {
   outputContains?: string[];
   outputExcludes?: string[];
@@ -41,6 +48,7 @@ type TaskAssertions = {
   manualRuleDeny?: boolean;
   observedStatus?: string;
   observedDecision?: string;
+  filesUnchanged?: string[];
   stageExcludes?: string[];
 };
 
@@ -51,6 +59,7 @@ type ExecutionDefinition = {
   expectedStages: string[];
   timeoutSec: number;
   allowedWritePaths?: string[];
+  validationCommands?: ValidationCommand[];
   assertions: TaskAssertions;
 };
 
@@ -109,6 +118,7 @@ type InstanceSpec = {
   expectedStages: string[];
   timeoutSec: number;
   allowedWritePaths: string[];
+  validationCommands: ValidationCommand[];
   assertions: TaskAssertions;
 };
 
@@ -409,6 +419,75 @@ async function validateTaskPackage(taskFile: string): Promise<void> {
     }
   }
 
+  const validationCommands = execution?.validationCommands;
+  if (validationCommands !== undefined) {
+    if (!Array.isArray(validationCommands)) {
+      throw new Error(`execution.validationCommands must be an array when present: ${taskFile}`);
+    }
+    for (const [index, validationCommand] of validationCommands.entries()) {
+      if (!isRecord(validationCommand)) {
+        throw new Error(
+          `execution.validationCommands[${index}] must be an object: ${taskFile}`,
+        );
+      }
+      if (!isNonEmptyString(validationCommand.command)) {
+        throw new Error(
+          `execution.validationCommands[${index}].command must be a non-empty string: ${taskFile}`,
+        );
+      }
+      if (
+        typeof validationCommand.expectedExitCode !== "number" ||
+        !Number.isInteger(validationCommand.expectedExitCode) ||
+        validationCommand.expectedExitCode < 0 ||
+        validationCommand.expectedExitCode > 255
+      ) {
+        throw new Error(
+          `execution.validationCommands[${index}].expectedExitCode must be an integer between 0 and 255: ${taskFile}`,
+        );
+      }
+      for (const field of ["outputContains", "outputExcludes"] as const) {
+        const value = validationCommand[field];
+        if (value === undefined) {
+          continue;
+        }
+        if (!Array.isArray(value)) {
+          throw new Error(
+            `execution.validationCommands[${index}].${field} must be an array when present: ${taskFile}`,
+          );
+        }
+        for (const [tokenIndex, token] of value.entries()) {
+          if (!isNonEmptyString(token)) {
+            throw new Error(
+              `execution.validationCommands[${index}].${field}[${tokenIndex}] must be a non-empty string: ${taskFile}`,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  const assertions = isRecord(execution?.assertions) ? execution.assertions : null;
+  const filesUnchanged = assertions?.filesUnchanged;
+  if (filesUnchanged !== undefined) {
+    if (!Array.isArray(filesUnchanged)) {
+      throw new Error(`execution.assertions.filesUnchanged must be an array when present: ${taskFile}`);
+    }
+    const seenFilesUnchanged = new Set<string>();
+    for (const [index, unchangedPath] of filesUnchanged.entries()) {
+      if (!isNonEmptyString(unchangedPath) || !isRelativeBenchPath(unchangedPath)) {
+        throw new Error(
+          `execution.assertions.filesUnchanged[${index}] must be a non-empty relative workspace path: ${taskFile}`,
+        );
+      }
+      if (seenFilesUnchanged.has(unchangedPath)) {
+        throw new Error(
+          `execution.assertions.filesUnchanged must be unique; duplicate "${unchangedPath}": ${taskFile}`,
+        );
+      }
+      seenFilesUnchanged.add(unchangedPath);
+    }
+  }
+
   const legacyVariantFiles = await Promise.all(
     REQUIRED_VARIANTS.map(async (variant) => ({
       variant,
@@ -502,6 +581,7 @@ function buildInstance(
     expectedStages: task.execution.expectedStages,
     timeoutSec: task.execution.timeoutSec,
     allowedWritePaths: task.execution.allowedWritePaths ?? [],
+    validationCommands: task.execution.validationCommands ?? [],
     assertions: task.execution.assertions,
   };
 }

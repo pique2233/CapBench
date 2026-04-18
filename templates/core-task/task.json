@@ -22,8 +22,17 @@
     "expectedOutcome": "completed",
     "expectedStages": ["pdp", "broker", "pep", "executor"],
     "timeoutSec": 600,
+    "allowedWritePaths": ["outputs/example.json"],
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": ["EXAMPLE_VALIDATION_OK"]
+      }
+    ],
     "assertions": {
       "outputContains": ["CAPBENCH_RESULT: completed"],
+      "filesUnchanged": ["docs/canonical-source.md", "scripts/validate_task.py"],
       "fileJsonFields": [
         {
           "path": "outputs/example.json",

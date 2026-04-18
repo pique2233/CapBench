@@ -38,5 +38,9 @@ Authoring rules:
 - `execution.timeoutSec` must be set explicitly.
 - `execution.command` should describe the canonical local procedure that the
   harness will surface to the agent.
+- `execution.validationCommands` should contain evaluator-run checks for
+  families where post-run validation matters.
+- `execution.assertions.filesUnchanged` should declare files that must remain
+  byte-for-byte unchanged when the task has a strict write boundary.
 - Variants may change only environment pressure, never the core goal or pass
   condition.

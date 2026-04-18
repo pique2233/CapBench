@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "CapBench Instance",
   "type": "object",
+  "additionalProperties": false,
   "required": [
     "id",
     "coreTaskId",
@@ -10,12 +11,19 @@
     "subcategory",
     "complexity",
     "title",
+    "description",
+    "taskPath",
+    "instructionPath",
+    "seedWorkspaceDir",
+    "variantWorkspaceDir",
     "deliverables",
     "kind",
     "command",
     "expectedOutcome",
     "expectedStages",
     "timeoutSec",
+    "allowedWritePaths",
+    "validationCommands",
     "assertions"
   ],
   "properties": {
@@ -26,20 +34,137 @@
     "subcategory": { "type": "string" },
     "complexity": { "enum": ["low", "medium", "high"] },
     "title": { "type": "string" },
+    "description": { "type": "string" },
+    "taskPath": { "type": "string" },
+    "instructionPath": { "type": "string" },
+    "seedWorkspaceDir": { "type": "string" },
+    "variantWorkspaceDir": { "type": ["string", "null"] },
     "kind": { "enum": ["allow", "constrain", "manual_rule_deny", "safe_agent_deny"] },
     "command": { "type": "string" },
     "deliverables": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["path", "kind", "description"],
-        "properties": {
-          "path": { "type": "string" },
-          "kind": { "enum": ["text", "json"] },
-          "description": { "type": "string" }
+      "items": { "$ref": "#/$defs/deliverableDefinition" }
+    },
+    "expectedOutcome": { "enum": ["completed", "blocked"] },
+    "expectedStages": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "timeoutSec": { "type": "integer", "minimum": 30, "maximum": 900 },
+    "allowedWritePaths": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "validationCommands": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/validationCommand" }
+    },
+    "assertions": { "$ref": "#/$defs/taskAssertions" }
+  },
+  "$defs": {
+    "deliverableDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "kind", "description"],
+      "properties": {
+        "path": { "type": "string" },
+        "kind": { "enum": ["text", "json"] },
+        "description": { "type": "string" }
+      }
+    },
+    "fileContainsAssertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "contains"],
+      "properties": {
+        "path": { "type": "string" },
+        "contains": {
+          "type": "array",
+          "items": { "type": "string" }
         }
       }
     },
-    "timeoutSec": { "type": "integer", "minimum": 30, "maximum": 900 }
+    "jsonFieldExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "equals"],
+      "properties": {
+        "key": { "type": "string" },
+        "equals": {
+          "type": ["string", "number", "boolean", "null"]
+        }
+      }
+    },
+    "fileJsonFieldsAssertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "fields"],
+      "properties": {
+        "path": { "type": "string" },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/jsonFieldExpectation" }
+        }
+      }
+    },
+    "validationCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "expectedExitCode"],
+      "properties": {
+        "command": { "type": "string" },
+        "expectedExitCode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "outputContains": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "outputExcludes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "taskAssertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "outputContains": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "outputExcludes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "fileExists": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "fileContains": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fileContainsAssertion" }
+        },
+        "fileJsonFields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fileJsonFieldsAssertion" }
+        },
+        "attenuationSeen": { "type": "boolean" },
+        "manualRuleDeny": { "type": "boolean" },
+        "observedStatus": { "type": "string" },
+        "observedDecision": { "type": "string" },
+        "filesUnchanged": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "stageExcludes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
   }
 }

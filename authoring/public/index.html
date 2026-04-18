@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CapBench Authoring Studio</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">CapBench Authoring Studio</p>
+          <h1>Natural-language task intake, structured package generation, and automated review.</h1>
+          <p class="lede">
+            Choose the layer, subcategory, and difficulty. Describe the task in one paragraph. The studio turns it into a
+            publishable task package with `instruction.md`, `task.json`, `seed/workspace`, variants, registry refresh, and review.
+          </p>
+          <div class="hero-actions">
+            <button id="add-request-button" class="primary">Add Request</button>
+            <button id="load-demo-button" class="ghost">Load Demo Trio</button>
+          </div>
+        </div>
+        <div class="hero-facts">
+          <div>
+            <span>12</span>
+            <p>Subcategories wired into the catalog</p>
+          </div>
+          <div>
+            <span>3</span>
+            <p>Fixed variants per generated core task</p>
+          </div>
+          <div>
+            <span>1</span>
+            <p>Write path: directly into bench `tasks/` plus registry refresh</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="panel intake">
+          <div class="panel-header">
+            <h2>Batch Intake</h2>
+            <p>Queue one or many requests, then generate them together.</p>
+          </div>
+          <div id="request-list" class="request-list"></div>
+          <div class="panel-footer">
+            <button id="generate-button" class="primary">Generate Batch</button>
+          </div>
+        </div>
+
+        <div class="panel output">
+          <div class="panel-header">
+            <h2>Generator Output</h2>
+            <p>TaskSpec summary, write location, registry refresh status, and review findings.</p>
+          </div>
+          <div id="status-banner" class="status-banner idle">Waiting for requests.</div>
+          <div id="result-list" class="result-list"></div>
+        </div>
+      </section>
+    </main>
+
+    <template id="request-template">
+      <article class="request-card">
+        <div class="request-grid">
+          <label>
+            <span>Layer</span>
+            <select data-field="layer"></select>
+          </label>
+          <label>
+            <span>Subcategory</span>
+            <select data-field="subcategory"></select>
+          </label>
+          <label>
+            <span>Complexity</span>
+            <select data-field="complexity">
+              <option value="low">low</option>
+              <option value="medium" selected>medium</option>
+              <option value="high">high</option>
+            </select>
+          </label>
+        </div>
+        <label class="prompt-field">
+          <span>Natural-language task brief</span>
+          <textarea data-field="prompt" rows="5" placeholder="Describe the task in plain language."></textarea>
+        </label>
+        <div class="request-actions">
+          <button data-action="remove" class="ghost subtle">Remove</button>
+        </div>
+      </article>
+    </template>
+
+    <template id="result-template">
+      <article class="result-card">
+        <header>
+          <div>
+            <p class="result-id" data-role="coreTaskId"></p>
+            <h3 data-role="title"></h3>
+          </div>
+          <span data-role="reviewStatus" class="pill"></span>
+        </header>
+        <dl class="spec-grid">
+          <div>
+            <dt>Layer</dt>
+            <dd data-role="layer"></dd>
+          </div>
+          <div>
+            <dt>Subcategory</dt>
+            <dd data-role="subcategory"></dd>
+          </div>
+          <div>
+            <dt>Complexity</dt>
+            <dd data-role="complexity"></dd>
+          </div>
+          <div>
+            <dt>Outcome</dt>
+            <dd data-role="expectedOutcome"></dd>
+          </div>
+          <div>
+            <dt>Command</dt>
+            <dd data-role="command"></dd>
+          </div>
+          <div>
+            <dt>Task Dir</dt>
+            <dd data-role="taskDir"></dd>
+          </div>
+        </dl>
+        <div class="result-section">
+          <h4>Deliverables</h4>
+          <ul data-role="deliverables"></ul>
+        </div>
+        <div class="result-section">
+          <h4>Review Findings</h4>
+          <ul data-role="findings"></ul>
+        </div>
+      </article>
+    </template>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

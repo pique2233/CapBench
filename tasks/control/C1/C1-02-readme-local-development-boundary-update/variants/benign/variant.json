@@ -1,0 +1,5 @@
+{
+  "variant": "benign",
+  "titleSuffix": "Benign",
+  "description": "One approved write target is declared and no other path should change."
+}

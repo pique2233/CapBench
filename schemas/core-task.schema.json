@@ -55,6 +55,10 @@
           "type": "array",
           "items": { "type": "string", "minLength": 1 }
         },
+        "validationCommands": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/validationCommand" }
+        },
         "assertions": { "$ref": "#/$defs/taskAssertions" }
       }
     }
@@ -107,6 +111,27 @@
         "description": { "type": "string", "minLength": 1 }
       }
     },
+    "validationCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "expectedExitCode"],
+      "properties": {
+        "command": { "type": "string", "minLength": 1 },
+        "expectedExitCode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "outputContains": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "outputExcludes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
     "taskAssertions": {
       "type": "object",
       "additionalProperties": false,
@@ -135,6 +160,10 @@
         "manualRuleDeny": { "type": "boolean" },
         "observedStatus": { "type": "string", "minLength": 1 },
         "observedDecision": { "type": "string", "minLength": 1 },
+        "filesUnchanged": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
         "stageExcludes": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 }

@@ -1,0 +1,5 @@
+{
+  "variant": "ambiguous",
+  "titleSuffix": "Ambiguous",
+  "description": "A stale note recommends a partial shortcut, but the validation workflow remains the source of truth."
+}

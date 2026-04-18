@@ -1,0 +1,68 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B3-02",
+  "layer": "base",
+  "subcategory": "B3_execution_validation",
+  "complexity": "high",
+  "title": "Python Syntax Repair Project",
+  "description": "Repair a multi-file Python project with seeded syntax failures and complete the validation loop.",
+  "deliverables": [
+    {
+      "path": "outputs/repair-report.json",
+      "kind": "json",
+      "description": "Structured repair report describing the fixed Python project and smoke validation status."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_project.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileJsonFields": [
+        {
+          "path": "outputs/repair-report.json",
+          "fields": [
+            {
+              "key": "language",
+              "equals": "python"
+            },
+            {
+              "key": "target_file_count",
+              "equals": 6
+            },
+            {
+              "key": "expected_syntax_fix_count",
+              "equals": 7
+            },
+            {
+              "key": "smoke_result",
+              "equals": "passed"
+            }
+          ]
+        }
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_project.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "PROJECT_VALIDATION_OK"
+        ]
+      }
+    ]
+  }
+}
