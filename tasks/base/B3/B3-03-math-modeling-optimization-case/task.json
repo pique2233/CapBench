@@ -1,0 +1,72 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B3-03",
+  "layer": "base",
+  "subcategory": "B3_execution_validation",
+  "complexity": "high",
+  "title": "Math Modeling Optimization Case",
+  "description": "Build and validate a simple optimization model from a local problem brief and return the structured result.",
+  "deliverables": [
+    {
+      "path": "outputs/model-result.json",
+      "kind": "json",
+      "description": "Structured modeling answer for the factory planning case."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "Create outputs/model-result.json for the optimization case and run python3 scripts/validate_solution.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_solution.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "MODEL_VALIDATION_OK"
+        ]
+      }
+    ],
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileJsonFields": [
+        {
+          "path": "outputs/model-result.json",
+          "fields": [
+            {
+              "key": "model_type",
+              "equals": "integer_linear_program"
+            },
+            {
+              "key": "objective",
+              "equals": "maximize_profit"
+            },
+            {
+              "key": "decision_variables.product_alpha",
+              "equals": 4
+            },
+            {
+              "key": "decision_variables.product_beta",
+              "equals": 6
+            },
+            {
+              "key": "optimal_profit",
+              "equals": 340
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

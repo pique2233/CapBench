@@ -11,6 +11,8 @@ const REQUIRED_INSTRUCTION_HEADINGS = [
   "## Completion Checklist",
 ];
 
+const HAN_REGEX = /\p{Script=Han}/u;
+
 function pushFinding(findings, severity, code, message) {
   findings.push({ severity, code, message });
 }
@@ -66,6 +68,19 @@ export async function reviewTaskPackage(taskDir) {
     }
     if (normalizeText(instruction).length < 240) {
       pushFinding(findings, "medium", "instruction_too_brief", "instruction.md is unusually short for a publishable benchmark task.");
+    }
+    if (HAN_REGEX.test(instruction)) {
+      pushFinding(findings, "high", "instruction_not_english_only", "instruction.md must be fully English for publishable benchmark tasks.");
+    }
+    if (instruction.includes("Prompt seed:")) {
+      pushFinding(findings, "high", "instruction_leaks_seed_prompt", "instruction.md must not expose the raw authoring prompt or a Prompt seed section.");
+    }
+  }
+
+  for (const fieldName of ["title", "description"]) {
+    const value = task?.[fieldName];
+    if (typeof value === "string" && HAN_REGEX.test(value)) {
+      pushFinding(findings, "high", "task_metadata_not_english_only", `task.json field ${fieldName} must be fully English.`);
     }
   }
 
@@ -169,6 +184,15 @@ export async function reviewTaskPackage(taskDir) {
       const manifest = await readJson(manifestPath);
       if (manifest.variant !== variant) {
         pushFinding(findings, "high", "variant_manifest_mismatch", `Variant manifest ${relativeUnix(taskDir, manifestPath)} must declare variant=${variant}.`);
+      }
+      if (typeof manifest.description === "string" && HAN_REGEX.test(manifest.description)) {
+        pushFinding(findings, "high", "variant_not_english_only", `Variant ${variant} description must be fully English.`);
+      }
+      if (
+        typeof manifest.description === "string" &&
+        manifest.description.toLowerCase().includes("canonical task remains:")
+      ) {
+        pushFinding(findings, "high", "variant_leaks_seed_prompt", `Variant ${variant} description must not embed the raw authoring prompt.`);
       }
     }
   }

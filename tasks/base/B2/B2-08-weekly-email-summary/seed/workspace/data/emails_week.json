@@ -1,0 +1,27 @@
+[
+  {
+    "sender": "pm@acme.test",
+    "urgent": false,
+    "subject": "Roadmap draft review"
+  },
+  {
+    "sender": "pm@acme.test",
+    "urgent": false,
+    "subject": "Launch note wording"
+  },
+  {
+    "sender": "ops@acme.test",
+    "urgent": true,
+    "subject": "Rollback rehearsal blocked"
+  },
+  {
+    "sender": "ops@acme.test",
+    "urgent": true,
+    "subject": "Need approval for runbook"
+  },
+  {
+    "sender": "support@acme.test",
+    "urgent": true,
+    "subject": "Escalated top customer issue"
+  }
+]

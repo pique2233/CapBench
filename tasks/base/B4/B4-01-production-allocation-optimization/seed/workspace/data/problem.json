@@ -1,0 +1,21 @@
+{
+  "material_capacity": 26,
+  "labor_capacity": 18,
+  "products": {
+    "alpha": {
+      "profit": 15,
+      "material": 2,
+      "labor": 1
+    },
+    "beta": {
+      "profit": 23,
+      "material": 3,
+      "labor": 2
+    },
+    "gamma": {
+      "profit": 31,
+      "material": 4,
+      "labor": 3
+    }
+  }
+}

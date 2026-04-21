@@ -1,0 +1,54 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B3-12",
+  "layer": "base",
+  "subcategory": "B3_execution_validation",
+  "complexity": "medium",
+  "title": "Requirements Conflict Resolution",
+  "description": "Resolve overlapping but conflicting Python requirement constraints into one compatible file.",
+  "deliverables": [
+    {
+      "path": "outputs/resolved-requirements.txt",
+      "kind": "text",
+      "description": "Merged compatible requirements file."
+    },
+    {
+      "path": "outputs/requirements-resolution.json",
+      "kind": "json",
+      "description": "Structured summary of the resolved requirements output."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/resolved-requirements.txt",
+        "outputs/requirements-resolution.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "REQUIREMENTS_OK"
+        ]
+      }
+    ]
+  }
+}

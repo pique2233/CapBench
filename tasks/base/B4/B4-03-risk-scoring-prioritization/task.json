@@ -1,0 +1,48 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B4-03",
+  "layer": "base",
+  "subcategory": "B4_recovery_stateful_workflow",
+  "complexity": "medium",
+  "title": "Risk Scoring Prioritization",
+  "description": "Build a weighted risk score and rank the cases by priority.",
+  "deliverables": [
+    {
+      "path": "outputs/risk-ranking.json",
+      "kind": "json",
+      "description": "Ranked risk cases and the scoring model label."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/risk-ranking.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "RISK_SCORING_OK"
+        ]
+      }
+    ]
+  }
+}

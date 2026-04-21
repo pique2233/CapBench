@@ -1,0 +1,54 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B2-06",
+  "layer": "base",
+  "subcategory": "B2_transform_synthesis",
+  "complexity": "medium",
+  "title": "README Fragment Merge",
+  "description": "Merge multiple documentation fragments into one final README.",
+  "deliverables": [
+    {
+      "path": "outputs/final-README.md",
+      "kind": "text",
+      "description": "Final merged README assembled from the source fragments."
+    },
+    {
+      "path": "outputs/readme-summary.json",
+      "kind": "json",
+      "description": "Summary counts for the merged README."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/final-README.md",
+        "outputs/readme-summary.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "README_MERGE_OK"
+        ]
+      }
+    ]
+  }
+}

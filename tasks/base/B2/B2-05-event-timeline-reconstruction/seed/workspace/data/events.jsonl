@@ -1,0 +1,5 @@
+{"id": "EV-3", "ts": "2026-04-21T09:10:00Z", "message": "Retry scheduled"}
+{"id": "EV-1", "ts": "2026-04-21T09:00:00Z", "message": "Worker started"}
+{"id": "EV-5", "ts": "2026-04-21T09:20:00Z", "message": "Issue resolved"}
+{"id": "EV-2", "ts": "2026-04-21T09:05:00Z", "message": "Database timeout observed"}
+{"id": "EV-4", "ts": "2026-04-21T09:15:00Z", "message": "Manual override applied"}

@@ -1,0 +1,15 @@
+{
+  "app": {
+    "name": "launch-portal",
+    "host": "127.0.0.1",
+    "port": 8080
+  },
+  "features": {
+    "enableReports": true,
+    "enableExports": false
+  },
+  "limits": {
+    "maxUsers": 250,
+    "region": "apac"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B2-04",
+  "layer": "base",
+  "subcategory": "B2_transform_synthesis",
+  "complexity": "medium",
+  "title": "CRM Structured Meeting Summary",
+  "description": "Turn messy customer meeting notes into a CRM-ready structured summary.",
+  "deliverables": [
+    {
+      "path": "outputs/crm-summary.json",
+      "kind": "json",
+      "description": "CRM-ready structured summary of the customer notes."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/crm-summary.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "CRM_SUMMARY_OK"
+        ]
+      }
+    ]
+  }
+}

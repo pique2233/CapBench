@@ -1,0 +1,54 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B2-02",
+  "layer": "base",
+  "subcategory": "B2_transform_synthesis",
+  "complexity": "medium",
+  "title": "Interview Feedback Hiring Summary",
+  "description": "Aggregate interview feedback into final recommendation, hold, and reject buckets.",
+  "deliverables": [
+    {
+      "path": "outputs/hiring-decision.json",
+      "kind": "json",
+      "description": "Structured hiring recommendation grouped into recommend, hold, and reject."
+    },
+    {
+      "path": "outputs/hiring-summary.md",
+      "kind": "text",
+      "description": "One-page written summary of the final hiring conclusion."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/hiring-decision.json",
+        "outputs/hiring-summary.md"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "HIRING_SUMMARY_OK"
+        ]
+      }
+    ]
+  }
+}

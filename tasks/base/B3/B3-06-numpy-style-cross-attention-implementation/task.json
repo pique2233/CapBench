@@ -1,0 +1,48 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B3-06",
+  "layer": "base",
+  "subcategory": "B3_execution_validation",
+  "complexity": "high",
+  "title": "NumPy-Style Cross Attention Implementation",
+  "description": "Implement cross attention semantics on array-like nested lists and validate against a reference case.",
+  "deliverables": [
+    {
+      "path": "outputs/cross-attention-report.json",
+      "kind": "json",
+      "description": "Validation report for the cross attention implementation."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/cross-attention-report.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "CROSS_ATTENTION_OK"
+        ]
+      }
+    ]
+  }
+}

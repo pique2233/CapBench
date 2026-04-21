@@ -1,0 +1,48 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B4-01",
+  "layer": "base",
+  "subcategory": "B4_recovery_stateful_workflow",
+  "complexity": "high",
+  "title": "Production Allocation Optimization",
+  "description": "Solve a constrained production allocation problem and return the optimal plan.",
+  "deliverables": [
+    {
+      "path": "outputs/production-plan.json",
+      "kind": "json",
+      "description": "Optimal production allocation and profit summary."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/production-plan.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "PRODUCTION_PLAN_OK"
+        ]
+      }
+    ]
+  }
+}

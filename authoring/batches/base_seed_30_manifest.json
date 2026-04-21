@@ -1,0 +1,126 @@
+{
+  "batch": "base_seed_30",
+  "count": 30,
+  "items": [
+    {
+      "prompt": "Triage the inbox for this week's release, identify the items that must be handled today, and draft a concise status email.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B2/B2-01-release-inbox-triage"
+    },
+    {
+      "prompt": "Summarize this batch of interview feedback into a one-page hiring conclusion with recommend, hold, and reject groups.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B2/B2-02-interview-feedback-hiring-summary"
+    },
+    {
+      "prompt": "Use product, engineering, and operations inputs to write a cross-team handoff note that lets the next shift resume immediately.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B2/B2-03-cross-team-shift-handoff"
+    },
+    {
+      "prompt": "Turn a messy batch of customer post-meeting notes into a CRM-ready structured summary.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B2/B2-04-crm-structured-meeting-summary"
+    },
+    {
+      "prompt": "Build a simple production allocation model and return the optimal product mix under capacity and material constraints.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B4/B4-01-production-allocation-optimization"
+    },
+    {
+      "prompt": "Optimize advertising budget allocation using historical ROI and diminishing marginal return.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B4/B4-02-advertising-budget-optimization"
+    },
+    {
+      "prompt": "Build a risk prioritization score from multiple risk factors and rank the cases.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B4/B4-03-risk-scoring-prioritization"
+    },
+    {
+      "prompt": "Compute the break-even point for the project from cost, price, and fixed overhead inputs.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B4/B4-04-break-even-analysis"
+    },
+    {
+      "prompt": "Implement a solver for the eight queens problem.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B3/B3-04-eight-queens-implementation"
+    },
+    {
+      "prompt": "Repair a work queue with concurrency or ordering bugs that cause dropped or duplicated results.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B3/B3-05-work-queue-concurrency-repair"
+    },
+    {
+      "prompt": "Implement a reasonably complete NumPy-style cross attention function.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B3/B3-06-numpy-style-cross-attention-implementation"
+    },
+    {
+      "prompt": "Write a simple data cleaning pipeline that handles missing values, duplicates, and basic normalization.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B3/B3-07-data-cleaning-pipeline"
+    },
+    {
+      "prompt": "Extract and recover readable text from a provided OCR-style source document.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B1/B1-02-ocr-text-recovery"
+    },
+    {
+      "prompt": "Write a script that converts Markdown into structured JSON.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B3/B3-08-markdown-to-structured-json"
+    },
+    {
+      "prompt": "Audit a sample of labeled training data and flag inconsistent or ambiguous annotations.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B1/B1-03-label-audit-sampling-review"
+    },
+    {
+      "prompt": "Reconstruct a clear timeline from the raw event records in the directory.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B2/B2-05-event-timeline-reconstruction"
+    },
+    {
+      "prompt": "Merge multiple document fragments into one final README.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B2/B2-06-readme-fragment-merge"
+    },
+    {
+      "prompt": "Repair a startup failure using the provided code and configuration files.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B3/B3-09-startup-service-repair"
+    },
+    {
+      "prompt": "Implement a Python FIFO queue.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B3/B3-10-python-fifo-queue"
+    },
+    {
+      "prompt": "Parse ten paper entries and extract structured metadata such as title, authors, and abstract.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B1/B1-04-paper-metadata-extraction"
+    },
+    {
+      "prompt": "Create a command-line parser in Python using argparse.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B3/B3-11-argparse-cli-parser"
+    },
+    {
+      "prompt": "Clean a noisy dataset and then perform a linear fit.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B4/B4-05-dirty-data-linear-fit"
+    },
+    {
+      "prompt": "Merge multiple CSV files for customers, orders, and products and compute the required analytics.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B4/B4-06-multi-csv-merge-analytics"
+    },
+    {
+      "prompt": "Resolve overlapping and conflicting dependencies across two Python requirements files.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B3/B3-12-requirements-conflict-resolution"
+    },
+    {
+      "prompt": "Convert a nested JSON web application config into YAML and save the output as config.yaml.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B3/B3-13-config-json-to-yaml"
+    },
+    {
+      "prompt": "Extract the structure of each HTML form from a static form.html file.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B1/B1-05-html-form-structure-extraction"
+    },
+    {
+      "prompt": "Analyze a simulated ps aux output stored in workspace/processes.txt.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B1/B1-06-process-snapshot-analysis"
+    },
+    {
+      "prompt": "Extract every hyperlink from a static HTML file and classify each link.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B1/B1-07-hyperlink-extraction-and-classification"
+    },
+    {
+      "prompt": "Create a recurring meeting plan with complete scheduling and agenda details.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B2/B2-07-recurring-meeting-planner"
+    },
+    {
+      "prompt": "Analyze one week of email JSON records and produce a structured sender-grouped weekly summary with urgency highlights.",
+      "taskDir": "/Users/liziwen/Desktop/CapClaw/capclaw/bench/tasks/base/B2/B2-08-weekly-email-summary"
+    }
+  ]
+}

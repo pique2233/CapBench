@@ -1,0 +1,42 @@
+[
+  {
+    "id": "EM-101",
+    "sender": "pm@acme.test",
+    "subject": "Release checklist final sign-off",
+    "release_related": true,
+    "action_by": "2026-04-21",
+    "summary": "Final sign-off is needed before 18:00, but no blocker remains."
+  },
+  {
+    "id": "EM-102",
+    "sender": "ops@acme.test",
+    "subject": "Migration dry-run failed",
+    "release_related": true,
+    "action_by": "2026-04-21",
+    "summary": "The billing migration dry-run failed and blocks tomorrow morning release unless fixed today."
+  },
+  {
+    "id": "EM-103",
+    "sender": "legal@acme.test",
+    "subject": "Press quote wording",
+    "release_related": false,
+    "action_by": "2026-04-23",
+    "summary": "Optional wording review for the launch quote."
+  },
+  {
+    "id": "EM-104",
+    "sender": "support@acme.test",
+    "subject": "Need ETA for top customer",
+    "release_related": true,
+    "action_by": "2026-04-21",
+    "summary": "The support team needs an ETA before noon to update Pine Ridge Clinic."
+  },
+  {
+    "id": "EM-105",
+    "sender": "qa@acme.test",
+    "subject": "Regression retest passed",
+    "release_related": true,
+    "action_by": "2026-04-22",
+    "summary": "Retest passed; informational only."
+  }
+]

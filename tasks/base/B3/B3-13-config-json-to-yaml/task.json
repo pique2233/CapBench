@@ -1,0 +1,54 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B3-13",
+  "layer": "base",
+  "subcategory": "B3_execution_validation",
+  "complexity": "medium",
+  "title": "Config JSON To YAML",
+  "description": "Convert a nested JSON config into the required YAML output.",
+  "deliverables": [
+    {
+      "path": "outputs/config.yaml",
+      "kind": "text",
+      "description": "YAML conversion of the source config file."
+    },
+    {
+      "path": "outputs/config-yaml-report.json",
+      "kind": "json",
+      "description": "Structured conversion report."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/config.yaml",
+        "outputs/config-yaml-report.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "CONFIG_YAML_OK"
+        ]
+      }
+    ]
+  }
+}

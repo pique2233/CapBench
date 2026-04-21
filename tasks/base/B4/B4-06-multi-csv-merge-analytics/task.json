@@ -1,0 +1,48 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B4-06",
+  "layer": "base",
+  "subcategory": "B4_recovery_stateful_workflow",
+  "complexity": "medium",
+  "title": "Multi-CSV Merge Analytics",
+  "description": "Merge customer, order, and product CSV files to compute regional and category revenue totals.",
+  "deliverables": [
+    {
+      "path": "outputs/order-analytics.json",
+      "kind": "json",
+      "description": "Merged analytics by region and category."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/order-analytics.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "CSV_MERGE_OK"
+        ]
+      }
+    ]
+  }
+}

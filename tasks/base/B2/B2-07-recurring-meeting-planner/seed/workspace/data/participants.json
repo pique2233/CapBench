@@ -1,0 +1,13 @@
+{
+  "attendees": [
+    "Nora",
+    "Sam",
+    "Ivy",
+    "Mina"
+  ],
+  "allowed_slots": [
+    "2026-04-23T09:00:00Z",
+    "2026-04-23T15:00:00Z"
+  ],
+  "duration_minutes": 45
+}

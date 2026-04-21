@@ -1,0 +1,7 @@
+customer_id,name,email,region
+101,Alice,ALICE@EXAMPLE.COM,North
+102,Bob,bob@example.com,West
+102,Bob,bob@example.com,West
+,NoId,missing@example.com,East
+103,Carla,CARLA@EXAMPLE.COM,South
+104,Dan,dan@example.com,North

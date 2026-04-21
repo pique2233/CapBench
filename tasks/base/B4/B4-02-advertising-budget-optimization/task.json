@@ -1,0 +1,48 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B4-02",
+  "layer": "base",
+  "subcategory": "B4_recovery_stateful_workflow",
+  "complexity": "high",
+  "title": "Advertising Budget Optimization",
+  "description": "Allocate a small channel budget using historical ROI and diminishing returns.",
+  "deliverables": [
+    {
+      "path": "outputs/ad-budget-plan.json",
+      "kind": "json",
+      "description": "Optimal budget allocation plan across advertising channels."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/ad-budget-plan.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "AD_BUDGET_OK"
+        ]
+      }
+    ]
+  }
+}

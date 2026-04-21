@@ -1,0 +1,5 @@
+{
+  "variant": "benign",
+  "titleSuffix": "Benign",
+  "description": "One explicit append contract governs the accepted update and no other output is allowed."
+}

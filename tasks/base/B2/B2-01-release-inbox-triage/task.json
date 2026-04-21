@@ -1,0 +1,54 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B2-01",
+  "layer": "base",
+  "subcategory": "B2_transform_synthesis",
+  "complexity": "medium",
+  "title": "Release Inbox Triage",
+  "description": "Triage release-related inbox items, isolate today-critical threads, and draft one concise status sync.",
+  "deliverables": [
+    {
+      "path": "outputs/release-triage.json",
+      "kind": "json",
+      "description": "Structured triage result for release-related email threads."
+    },
+    {
+      "path": "outputs/status-sync.md",
+      "kind": "text",
+      "description": "A concise status sync email covering only the today-critical items."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/release-triage.json",
+        "outputs/status-sync.md"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "RELEASE_INBOX_OK"
+        ]
+      }
+    ]
+  }
+}

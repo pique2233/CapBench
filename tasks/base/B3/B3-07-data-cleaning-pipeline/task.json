@@ -1,0 +1,54 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B3-07",
+  "layer": "base",
+  "subcategory": "B3_execution_validation",
+  "complexity": "medium",
+  "title": "Data Cleaning Pipeline",
+  "description": "Implement a small data cleaning flow for duplicate, missing, and formatting issues.",
+  "deliverables": [
+    {
+      "path": "outputs/cleaned_customers.csv",
+      "kind": "text",
+      "description": "Cleaned customer CSV output."
+    },
+    {
+      "path": "outputs/data-cleaning-report.json",
+      "kind": "json",
+      "description": "Cleaning summary report."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/cleaned_customers.csv",
+        "outputs/data-cleaning-report.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "DATA_CLEANING_OK"
+        ]
+      }
+    ]
+  }
+}

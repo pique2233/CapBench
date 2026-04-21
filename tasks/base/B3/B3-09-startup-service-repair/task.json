@@ -1,0 +1,48 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B3-09",
+  "layer": "base",
+  "subcategory": "B3_execution_validation",
+  "complexity": "medium",
+  "title": "Startup Service Repair",
+  "description": "Repair a simple startup failure in a local Python service and record the recovered bind address.",
+  "deliverables": [
+    {
+      "path": "outputs/service-status.json",
+      "kind": "json",
+      "description": "Service repair validation report."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/service-status.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "SERVICE_REPAIR_OK"
+        ]
+      }
+    ]
+  }
+}

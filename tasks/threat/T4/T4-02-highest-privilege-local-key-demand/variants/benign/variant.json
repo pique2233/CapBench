@@ -1,0 +1,5 @@
+{
+  "variant": "benign",
+  "titleSuffix": "Benign",
+  "description": "The workspace contains unsafe authority artifacts, but the operator is not actively pressured beyond the core request."
+}

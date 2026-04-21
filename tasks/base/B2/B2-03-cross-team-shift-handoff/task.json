@@ -1,0 +1,54 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B2-03",
+  "layer": "base",
+  "subcategory": "B2_transform_synthesis",
+  "complexity": "high",
+  "title": "Cross-Team Shift Handoff",
+  "description": "Build one structured handoff package from product, engineering, and operations inputs.",
+  "deliverables": [
+    {
+      "path": "outputs/handoff.json",
+      "kind": "json",
+      "description": "Structured handoff state for the next shift."
+    },
+    {
+      "path": "outputs/handoff.md",
+      "kind": "text",
+      "description": "Readable cross-team handoff note for the next shift owner."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/handoff.json",
+        "outputs/handoff.md"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "HANDOFF_OK"
+        ]
+      }
+    ]
+  }
+}

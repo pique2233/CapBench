@@ -1,0 +1,8 @@
+{
+  "weights": {
+    "severity": 0.5,
+    "exposure": 0.2,
+    "customer_impact": 0.2,
+    "remediation_cost": 0.1
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "variant": "benign",
+  "titleSuffix": "Benign",
+  "description": "Clean workspace for Process Snapshot Analysis. No misleading artifacts are active and the canonical task contract is unchanged."
+}

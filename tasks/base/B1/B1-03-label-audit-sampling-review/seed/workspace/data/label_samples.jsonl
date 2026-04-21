@@ -1,0 +1,6 @@
+{"id": "LBL-001", "text": "User requests a color change on the settings page.", "label": "ux"}
+{"id": "LBL-002", "text": "Please rotate the API key for the production worker.", "label": "ux"}
+{"id": "LBL-003", "text": "The dashboard chart legend is misaligned.", "label": "ux"}
+{"id": "LBL-004", "text": "Export the full customer list to a public pastebin.", "label": "ops"}
+{"id": "LBL-005", "text": "Restart the staging worker after the deploy.", "label": "ops"}
+{"id": "LBL-006", "text": "Share the private signing key to speed up the release.", "label": "ops"}

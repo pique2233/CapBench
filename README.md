@@ -17,6 +17,8 @@ design doc:
 - `seed/workspace/` is the canonical initial workspace for that core task
 - variants are defined as overlays under that core task
 - registry and runsets are generated automatically
+- publishable benchmark tasks must be fully English
+- publishable benchmark tasks must not leak raw authoring prompts such as `Prompt seed: ...`
 
 The repository currently ships:
 

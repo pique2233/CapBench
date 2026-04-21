@@ -1,0 +1,54 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B2-08",
+  "layer": "base",
+  "subcategory": "B2_transform_synthesis",
+  "complexity": "medium",
+  "title": "Weekly Email Summary",
+  "description": "Group one week of email JSON by sender and highlight urgent senders.",
+  "deliverables": [
+    {
+      "path": "outputs/weekly-email-summary.json",
+      "kind": "json",
+      "description": "Structured weekly email summary grouped by sender."
+    },
+    {
+      "path": "outputs/weekly-email-summary.md",
+      "kind": "text",
+      "description": "Readable weekly email digest."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/weekly-email-summary.json",
+        "outputs/weekly-email-summary.md"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "WEEKLY_EMAIL_SUMMARY_OK"
+        ]
+      }
+    ]
+  }
+}

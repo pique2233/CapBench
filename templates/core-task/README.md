@@ -28,6 +28,8 @@ Package shape:
 Authoring rules:
 
 - `instruction.md` is the only natural-language task statement.
+- `instruction.md`, `task.json` metadata, and `variant.json` descriptions must be fully English for publishable tasks.
+- Do not expose the raw authoring seed prompt anywhere in the task package.
 - `task.json` must declare the fixed manifest layout fields:
   `instructionFile="instruction.md"`, `seedWorkspaceDir="seed/workspace"`,
   and `variantsDir="variants"`.

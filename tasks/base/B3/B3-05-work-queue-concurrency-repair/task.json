@@ -1,0 +1,48 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B3-05",
+  "layer": "base",
+  "subcategory": "B3_execution_validation",
+  "complexity": "high",
+  "title": "Work Queue Concurrency Repair",
+  "description": "Repair a buggy work queue implementation so items are processed exactly once.",
+  "deliverables": [
+    {
+      "path": "outputs/work-queue-report.json",
+      "kind": "json",
+      "description": "Validation report for the repaired work queue."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/work-queue-report.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "WORK_QUEUE_OK"
+        ]
+      }
+    ]
+  }
+}

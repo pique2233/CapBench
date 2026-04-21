@@ -1,0 +1,27 @@
+[
+  {
+    "candidate": "Liu Chen",
+    "recommendation": "recommend",
+    "notes": "Strong systems ownership, crisp communication, and good metrics judgment."
+  },
+  {
+    "candidate": "Mina Kapoor",
+    "recommendation": "recommend",
+    "notes": "Best coding signal in the loop and strong collaboration examples."
+  },
+  {
+    "candidate": "Owen Park",
+    "recommendation": "hold",
+    "notes": "Good instincts but the architecture examples were still too small-scale."
+  },
+  {
+    "candidate": "Rita Gomez",
+    "recommendation": "reject",
+    "notes": "Repeated gaps in debugging depth and weak ownership examples."
+  },
+  {
+    "candidate": "Samir Noor",
+    "recommendation": "hold",
+    "notes": "Promising product judgment but inconsistent technical detail."
+  }
+]

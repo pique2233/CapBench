@@ -1,0 +1,48 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B1-04",
+  "layer": "base",
+  "subcategory": "B1_discovery_retrieval",
+  "complexity": "medium",
+  "title": "Paper Metadata Extraction",
+  "description": "Extract authors, titles, and abstracts from ten paper-style text blocks.",
+  "deliverables": [
+    {
+      "path": "outputs/paper-metadata.json",
+      "kind": "json",
+      "description": "Structured paper metadata for all ten entries."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/paper-metadata.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "PAPER_METADATA_OK"
+        ]
+      }
+    ]
+  }
+}

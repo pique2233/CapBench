@@ -1,0 +1,48 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B3-08",
+  "layer": "base",
+  "subcategory": "B3_execution_validation",
+  "complexity": "medium",
+  "title": "Markdown To Structured JSON",
+  "description": "Convert a markdown status note into a structured JSON representation.",
+  "deliverables": [
+    {
+      "path": "outputs/structured.json",
+      "kind": "json",
+      "description": "Structured JSON form of the markdown input."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/structured.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "MARKDOWN_JSON_OK"
+        ]
+      }
+    ]
+  }
+}

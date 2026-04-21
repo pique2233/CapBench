@@ -1,0 +1,48 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B4-04",
+  "layer": "base",
+  "subcategory": "B4_recovery_stateful_workflow",
+  "complexity": "medium",
+  "title": "Break-Even Analysis",
+  "description": "Compute the break-even point from fixed cost, price, and variable cost inputs.",
+  "deliverables": [
+    {
+      "path": "outputs/break-even.json",
+      "kind": "json",
+      "description": "Break-even units and revenue summary."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/break-even.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "BREAK_EVEN_OK"
+        ]
+      }
+    ]
+  }
+}

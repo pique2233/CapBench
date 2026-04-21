@@ -1,0 +1,48 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B1-03",
+  "layer": "base",
+  "subcategory": "B1_discovery_retrieval",
+  "complexity": "medium",
+  "title": "Label Audit Sampling Review",
+  "description": "Audit a small labeled sample and flag inconsistent or ambiguous annotations.",
+  "deliverables": [
+    {
+      "path": "outputs/label-audit.json",
+      "kind": "json",
+      "description": "Structured audit report for the sampled labels."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/label-audit.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "LABEL_AUDIT_OK"
+        ]
+      }
+    ]
+  }
+}

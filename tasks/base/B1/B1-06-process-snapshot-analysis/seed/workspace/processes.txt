@@ -1,0 +1,5 @@
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root      1111  2.1  1.0 100000 10000 ?        Ssl  08:00   0:01 api-gateway
+ops       2222  1.5  5.5 220000 55000 ?        Sl   08:05   0:02 analytics-worker
+ops       3333  0.8  0.4  40000  4000 ?        Z    08:06   0:00 zombie-helper
+root      4242  7.9  1.2 120000 12000 ?        Sl   08:07   0:05 billing-api

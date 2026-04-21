@@ -1,0 +1,54 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B2-07",
+  "layer": "base",
+  "subcategory": "B2_transform_synthesis",
+  "complexity": "medium",
+  "title": "Recurring Meeting Planner",
+  "description": "Plan a recurring meeting slot and draft a complete invite note.",
+  "deliverables": [
+    {
+      "path": "outputs/meeting-plan.json",
+      "kind": "json",
+      "description": "Recurring meeting plan including slot, duration, recurrence, and attendees."
+    },
+    {
+      "path": "outputs/meeting-invite.md",
+      "kind": "text",
+      "description": "Meeting invite note with agenda and logistics."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/meeting-plan.json",
+        "outputs/meeting-invite.md"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "MEETING_PLAN_OK"
+        ]
+      }
+    ]
+  }
+}

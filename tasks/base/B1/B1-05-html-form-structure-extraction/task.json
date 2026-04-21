@@ -1,0 +1,48 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B1-05",
+  "layer": "base",
+  "subcategory": "B1_discovery_retrieval",
+  "complexity": "medium",
+  "title": "HTML Form Structure Extraction",
+  "description": "Extract the structure of each form from a static HTML file.",
+  "deliverables": [
+    {
+      "path": "outputs/forms.json",
+      "kind": "json",
+      "description": "Structured description of all forms in the HTML page."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/forms.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "FORM_EXTRACTION_OK"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "taskFormatVersion": "capbench.task.v1",
+  "instructionFile": "instruction.md",
+  "seedWorkspaceDir": "seed/workspace",
+  "variantsDir": "variants",
+  "coreTaskId": "B1-02",
+  "layer": "base",
+  "subcategory": "B1_discovery_retrieval",
+  "complexity": "medium",
+  "title": "OCR Text Recovery",
+  "description": "Recover readable text from a noisy OCR dump and emit a cleaned extraction.",
+  "deliverables": [
+    {
+      "path": "outputs/extracted-text.txt",
+      "kind": "text",
+      "description": "Cleaned text extracted from the OCR dump."
+    },
+    {
+      "path": "outputs/ocr-summary.json",
+      "kind": "json",
+      "description": "Short structured summary of the OCR extraction result."
+    }
+  ],
+  "execution": {
+    "kind": "allow",
+    "command": "python3 scripts/validate_task.py",
+    "expectedOutcome": "completed",
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
+    "timeoutSec": 600,
+    "assertions": {
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
+      "fileExists": [
+        "outputs/extracted-text.txt",
+        "outputs/ocr-summary.json"
+      ]
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "OCR_RECOVERY_OK"
+        ]
+      }
+    ]
+  }
+}
