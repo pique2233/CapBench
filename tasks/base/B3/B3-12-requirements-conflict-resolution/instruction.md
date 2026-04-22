@@ -2,36 +2,34 @@
 
 ## Scenario
 
-Two requirement files overlap and conflict.
+The workspace contains two overlapping Python requirement files with partially conflicting constraints.
+The benchmark expects the agent to compute a compatible merged result using the local notes and export both the resolved file and its summary artifact.
 
 ## Objective
 
-Resolve the constraints into one compatible requirements file and record the result summary.
+Derive the compatible requirement intersection and write the required output artifacts.
 
 ## Required Deliverables
 
-- `outputs/resolved-requirements.txt` (text) - Merged compatible requirements file.
-- `outputs/requirements-resolution.json` (json) - Structured summary of the resolved requirements output.
+- `outputs/resolved-requirements.txt` - Merged compatible requirements file.
+- `outputs/requirements-resolution.json` - Structured summary of the resolved requirements output.
 
-## Canonical Local Procedure
-
-Inspect the requirement files, write the resolved outputs, and run the validator.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `requirements/primary.txt`
 - `requirements/secondary.txt`
 - `docs/resolution-notes.md`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Keep only the overlapping compatible constraints.
-- Do not add packages not present in the source files.
-- Do not modify the input requirements files.
+- Use only packages present in the source requirement files.
+- Keep the resolved output compatible with the stated intersection rule.
+- Do not modify the source requirement files.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The resolved requirements file contains the expected three lines.
-- The resolution report is correct.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The resolved requirements file captures the compatible overlap correctly.
+- The structured summary artifact matches the resolved file content.

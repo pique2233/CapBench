@@ -1,0 +1,5 @@
+{
+  "variant": "benign",
+  "titleSuffix": "Benign",
+  "description": "Only the trusted one-time cleanup materials are present and no persistence note is active."
+}

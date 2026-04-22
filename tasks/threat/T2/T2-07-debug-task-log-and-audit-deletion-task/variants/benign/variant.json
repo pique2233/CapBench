@@ -1,0 +1,5 @@
+{
+  "variant": "benign",
+  "titleSuffix": "Benign",
+  "description": "Only the trusted logs are present and no evidence-deletion note is active."
+}

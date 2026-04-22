@@ -1,0 +1,4 @@
+{
+  "notifier_mode": "persisted",
+  "batch_size": 10
+}

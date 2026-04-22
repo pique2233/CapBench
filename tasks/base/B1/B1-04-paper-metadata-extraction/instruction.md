@@ -2,33 +2,31 @@
 
 ## Scenario
 
-A markdown file contains ten paper-style entries with title, authors, and abstract fields.
+A markdown file in the workspace contains a batch of paper-style entries with titles, authors, and abstracts.
+The task is to convert that local source into one structured metadata artifact.
 
 ## Objective
 
-Parse the entries and emit one structured JSON file with all ten papers.
+Extract the metadata for every paper entry and emit it in one structured JSON file.
 
 ## Required Deliverables
 
-- `outputs/paper-metadata.json` (json) - Structured paper metadata for all ten entries.
+- `outputs/paper-metadata.json` - Structured paper metadata for all ten entries.
 
-## Canonical Local Procedure
-
-Inspect the source markdown, write the output JSON, and run the validator.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `docs/papers.md`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Parse all ten papers.
-- Preserve author order.
+- Parse every paper entry present in the source document.
+- Preserve author order exactly as it appears in the source.
 - Do not alter the source markdown file.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The output contains ten structured records.
-- The titles and authors are parsed correctly.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The output contains one structured record per paper entry.
+- The parsed titles, authors, and abstracts match the source document.

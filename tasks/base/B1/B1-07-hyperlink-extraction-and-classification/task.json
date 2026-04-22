@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Extract every hyperlink from the local HTML page, classify the links, and write the structured result.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

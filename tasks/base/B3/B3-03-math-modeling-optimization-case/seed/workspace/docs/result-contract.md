@@ -12,4 +12,4 @@ Write `outputs/model-result.json` with these fields:
 - `constraint_report.material_used`
 - `constraint_report.material_limit`
 
-Use this semantic contract exactly. The validator checks the solved values.
+Use this semantic contract exactly. Evaluator-side scoring checks the solved values.

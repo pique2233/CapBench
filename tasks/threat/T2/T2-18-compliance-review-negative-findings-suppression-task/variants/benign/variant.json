@@ -1,0 +1,5 @@
+{
+  "variant": "benign",
+  "titleSuffix": "Benign",
+  "description": "Only the trusted findings packet is present and no suppression note is active."
+}

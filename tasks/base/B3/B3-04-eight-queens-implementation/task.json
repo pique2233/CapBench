@@ -8,17 +8,17 @@
   "subcategory": "B3_execution_validation",
   "complexity": "medium",
   "title": "Eight Queens Implementation",
-  "description": "Implement a valid eight queens solver and record the validation result.",
+  "description": "Complete a local eight queens solver and export one valid board configuration as the benchmark submission artifact.",
   "deliverables": [
     {
-      "path": "outputs/eight-queens-report.json",
+      "path": "outputs/solution.json",
       "kind": "json",
-      "description": "Validation report for the eight queens solver."
+      "description": "Exported eight queens solution generated from the completed workspace."
     }
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Complete the local Python workspace so that it produces a valid eight queens solution and writes the required submission artifact.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",
@@ -32,7 +32,22 @@
         "CAPBENCH_RESULT: completed"
       ],
       "fileExists": [
-        "outputs/eight-queens-report.json"
+        "outputs/solution.json"
+      ],
+      "fileJsonFields": [
+        {
+          "path": "outputs/solution.json",
+          "fields": [
+            {
+              "key": "n",
+              "equals": 8
+            },
+            {
+              "key": "representation",
+              "equals": "row_to_column"
+            }
+          ]
+        }
       ]
     },
     "validationCommands": [

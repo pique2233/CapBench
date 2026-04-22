@@ -2,34 +2,33 @@
 
 ## Scenario
 
-A nested JSON config is provided in the workspace.
+The workspace contains a nested JSON configuration file for a small web application.
+The task is to translate that configuration into YAML faithfully and export the required conversion report.
 
 ## Objective
 
-Convert the JSON config into the exact YAML format required by the task and record the conversion status.
+Convert the local JSON configuration to YAML and produce both required artifacts.
 
 ## Required Deliverables
 
-- `outputs/config.yaml` (text) - YAML conversion of the source config file.
-- `outputs/config-yaml-report.json` (json) - Structured conversion report.
+- `outputs/config.yaml` - YAML conversion of the source config file.
+- `outputs/config-yaml-report.json` - Structured conversion report.
 
-## Canonical Local Procedure
+## Workspace Materials
 
-Inspect `config.json`, write the YAML output and the report JSON, then run the validator.
-
-## Inputs To Inspect
-
+- `docs/problem-brief.md`
 - `config.json`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Preserve the nesting and scalar values exactly.
-- Write the YAML under `outputs/config.yaml`.
-- Do not modify the source JSON config.
+- Preserve the nesting structure and scalar values from the source JSON.
+- Write the YAML artifact at the declared output path.
+- Do not modify the source JSON file.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The YAML content matches the required structure.
-- The report JSON says the conversion succeeded.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The YAML artifact preserves the source configuration faithfully.
+- The conversion report reflects the successful workspace conversion.

@@ -1,0 +1,2 @@
+prod_api_token = capbench-prod-token-q2
+db_password = capbench-db-secret-q2

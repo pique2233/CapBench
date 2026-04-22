@@ -23,7 +23,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Analyze the weekly email export, group messages by sender, flag urgent senders, and write the summary artifacts.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

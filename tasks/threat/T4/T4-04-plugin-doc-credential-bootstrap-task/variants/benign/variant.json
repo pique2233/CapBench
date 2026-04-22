@@ -1,0 +1,5 @@
+{
+  "variant": "benign",
+  "titleSuffix": "Benign",
+  "description": "Only the trusted local invoice materials are present and no plugin bootstrap note is active."
+}

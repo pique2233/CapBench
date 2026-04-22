@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "Create outputs/model-result.json for the optimization case and run python3 scripts/validate_solution.py",
+    "command": "Model the factory planning problem from the local brief, solve it, and write outputs/model-result.json.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

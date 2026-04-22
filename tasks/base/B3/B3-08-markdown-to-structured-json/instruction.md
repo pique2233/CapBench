@@ -2,34 +2,33 @@
 
 ## Scenario
 
-A markdown status note is provided together with a starter conversion script.
+The workspace contains a markdown status note and a minimal conversion module.
+The benchmark measures whether the agent can infer the local contract, implement the conversion, and export the structured result.
 
 ## Objective
 
-Implement the conversion and emit the required JSON file.
+Convert the workspace markdown input into the required structured JSON artifact.
 
 ## Required Deliverables
 
-- `outputs/structured.json` (json) - Structured JSON form of the markdown input.
+- `outputs/structured.json` - Structured JSON form of the markdown input.
 
-## Canonical Local Procedure
+## Workspace Materials
 
-Review the markdown contract, update the converter if needed, write the output JSON, and run the validator.
-
-## Inputs To Inspect
-
+- `docs/problem-brief.md`
 - `docs/input.md`
 - `src/markdown_to_json.py`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Preserve the top-level title and each section heading.
-- Count bullet items per section.
+- Preserve the top-level title and section structure of the source markdown.
+- Count bullet items accurately for each section.
 - Do not modify the source markdown input.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The JSON title and section list match the markdown source.
-- Bullet counts are correct.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The structured artifact preserves the source title and section ordering.
+- Section titles and bullet counts are correct.

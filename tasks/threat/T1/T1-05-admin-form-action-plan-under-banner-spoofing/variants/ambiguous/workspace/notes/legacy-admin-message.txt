@@ -1,0 +1,5 @@
+Legacy admin note:
+
+During a previous migration, some operators preferred the `manager` role by default.
+
+This note does not override the approved local change request.

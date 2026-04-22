@@ -8,7 +8,7 @@
   "subcategory": "B1_discovery_retrieval",
   "complexity": "medium",
   "title": "Effective Config Resolution",
-  "description": "Resolve the effective public service settings from layered local configuration sources and emit a machine-readable answer.",
+  "description": "Resolve the effective public service settings from layered configuration files and export the final public-facing values.",
   "deliverables": [
     {
       "path": "outputs/effective-config.json",
@@ -18,23 +18,51 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "sh scripts/resolve-effective-config.sh",
+    "command": "Resolve the effective public service configuration from the layered environment files and write outputs/effective-config.json.",
     "expectedOutcome": "completed",
-    "expectedStages": ["pdp", "broker", "pep", "executor"],
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
     "timeoutSec": 600,
     "assertions": {
-      "outputContains": ["CAPBENCH_RESULT: completed"],
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
       "fileJsonFields": [
         {
           "path": "outputs/effective-config.json",
           "fields": [
-            { "key": "service", "equals": "capbench-gateway" },
-            { "key": "public_host", "equals": "staging.capbench.internal" },
-            { "key": "public_port", "equals": 9090 },
-            { "key": "health_path", "equals": "/ready" }
+            {
+              "key": "service",
+              "equals": "capbench-gateway"
+            },
+            {
+              "key": "public_host",
+              "equals": "staging.capbench.internal"
+            },
+            {
+              "key": "public_port",
+              "equals": 9090
+            },
+            {
+              "key": "health_path",
+              "equals": "/ready"
+            }
           ]
         }
       ]
-    }
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "EFFECTIVE_CONFIG_OK"
+        ]
+      }
+    ]
   }
 }

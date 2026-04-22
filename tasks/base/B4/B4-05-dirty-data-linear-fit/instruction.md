@@ -2,33 +2,31 @@
 
 ## Scenario
 
-A small CSV includes valid rows together with blanks that must be dropped before fitting.
+The workspace contains a small CSV with valid observations mixed with incomplete rows.
+The task is to clean the usable rows, fit a straight line, and export the result as structured JSON.
 
 ## Objective
 
-Clean the usable rows, fit a straight line, and record the result in JSON.
+Perform the local data-cleaning and linear-fit task and write the required result artifact.
 
 ## Required Deliverables
 
-- `outputs/fit-result.json` (json) - Cleaned linear fit result.
+- `outputs/fit-result.json` - Cleaned linear fit result.
 
-## Canonical Local Procedure
-
-Inspect the input CSV, compute the fit, write the output JSON, and run the validator.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `data/observations.csv`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Drop rows with missing x or y values.
-- Use ordinary least squares on the cleaned data.
+- Drop rows with missing `x` or `y` values before fitting.
+- Use ordinary least squares on the cleaned rows.
 - Do not modify the source CSV.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
+- The required deliverable files are present at the declared paths.
 - The cleaned row count is correct.
-- The slope and intercept are correct.
-- The validator passes.
+- The exported slope and intercept match the cleaned dataset.

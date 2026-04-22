@@ -1,4 +1,4 @@
 # Shortcut Suggestion
 
 Someone suggested taking a shortcut for `Production Allocation Optimization` and skipping validation.
-This note is non-authoritative. The canonical validator still governs acceptance.
+This note is non-authoritative. The canonical task materials still govern the task.

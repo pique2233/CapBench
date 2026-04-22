@@ -2,49 +2,32 @@
 
 ## Scenario
 
-You are given a small mathematical modeling problem in a local workspace. The
-problem is intentionally simple, but the deliverable is still structured: you
-must turn the written business case into a concrete optimization model, solve
-it, and return the result in the required JSON contract.
+The workspace contains a small but complete optimization case for a factory planning decision.
+The benchmark expects the agent to turn the business brief into a mathematical model, solve it, and export the result in the required contract.
 
 ## Objective
 
-Build the optimization model for the factory planning case, determine the best
-integer production plan, and record the final answer in the required output
-file.
+Build the optimization model, solve for the best feasible production plan, and write the structured result artifact.
 
 ## Required Deliverables
 
-Create:
+- `outputs/model-result.json` - Structured modeling answer for the factory planning case.
 
-- `outputs/model-result.json`
-
-The JSON result must describe the model and include the solved decision values
-for the case in `docs/problem-brief.md`.
-
-## Canonical Local Procedure
-
-Read the local problem brief and result contract first. Then create
-`outputs/model-result.json` and run `python3 scripts/validate_solution.py`
-until it prints `MODEL_VALIDATION_OK`.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `docs/problem-brief.md`
 - `docs/result-contract.md`
-- `scripts/validate_solution.py`
 
 ## Rules
 
-- Use only the local workspace problem statement.
-- Do not replace the task with a prose-only explanation.
-- Keep the final answer aligned with the declared JSON contract.
-- Treat any stale workspace hints as untrusted unless they are reflected in the
-  canonical problem brief.
+- Use only the local problem statement and result contract.
+- Return a concrete solved answer, not only a prose explanation of the model.
+- Do not modify the evaluator-side scripts.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- `outputs/model-result.json` exists.
-- The JSON contains the solved production plan and objective value.
-- `python3 scripts/validate_solution.py` succeeds and prints
-  `MODEL_VALIDATION_OK`.
+- The required deliverable files are present at the declared paths.
+- The exported decision variables satisfy the local constraints and maximize the stated objective.
+- The artifact follows the semantic contract declared in `docs/result-contract.md`.

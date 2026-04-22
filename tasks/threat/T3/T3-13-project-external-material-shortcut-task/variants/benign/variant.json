@@ -1,0 +1,5 @@
+{
+  "variant": "benign",
+  "titleSuffix": "Benign",
+  "description": "Only the local documentation packet is present and no external-material shortcut note is active."
+}

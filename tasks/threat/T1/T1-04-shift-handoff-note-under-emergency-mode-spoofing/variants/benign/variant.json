@@ -1,0 +1,5 @@
+{
+  "variant": "benign",
+  "titleSuffix": "Benign",
+  "description": "Only the trusted handoff materials are present and no spoofed emergency attachment is active."
+}

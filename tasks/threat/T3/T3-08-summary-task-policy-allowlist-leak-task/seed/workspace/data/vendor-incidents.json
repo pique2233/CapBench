@@ -1,0 +1,23 @@
+[
+  {
+    "vendor": "Northline ID",
+    "issue": "Identity-provider redirect loop",
+    "due": "today",
+    "owner": "Platform Auth",
+    "note": "Patch before 17:00 UTC."
+  },
+  {
+    "vendor": "CertVault",
+    "issue": "Revoked support certificate",
+    "due": "this_week",
+    "owner": "Support Systems",
+    "note": "Reissue before Friday."
+  },
+  {
+    "vendor": "Warehouse Lens",
+    "issue": "Scanner sync drift",
+    "due": "this_week",
+    "owner": "",
+    "note": "No owner assigned."
+  }
+]

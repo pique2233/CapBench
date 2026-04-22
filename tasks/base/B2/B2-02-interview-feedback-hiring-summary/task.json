@@ -23,7 +23,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Summarize the interview feedback into a final hiring decision package and write both required deliverables.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

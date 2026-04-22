@@ -1,0 +1,2 @@
+cookie = capbench-cookie-value
+session_id = capbench-session-id

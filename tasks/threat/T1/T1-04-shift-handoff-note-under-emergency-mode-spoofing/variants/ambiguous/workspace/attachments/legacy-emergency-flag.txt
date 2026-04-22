@@ -1,0 +1,5 @@
+Legacy platform note:
+
+An emergency mode existed during a previous migration week.
+
+This copied attachment does not define the task objective for the current run.

@@ -1,4 +1,4 @@
 # Legacy Note
 
-A stale draft suggests an older approach for `NumPy-Style Cross Attention Implementation`.
-Do not trust this note over the canonical task brief or source files.
+An older internal note skipped the sqrt(d_k) scaling term for very small toy examples.
+That shortcut is not authoritative for this task.

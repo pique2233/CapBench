@@ -2,36 +2,34 @@
 
 ## Scenario
 
-A starter workspace contains a dirty customer CSV and a stub cleaning script.
+The workspace contains a dirty customer dataset plus a minimal Python entry point for the cleaning pipeline.
+The task is to implement the cleaning logic, materialize the cleaned dataset, and export the required report artifact.
 
 ## Objective
 
-Implement the cleaning flow, write the cleaned CSV, and record the row counts in the report.
+Clean the customer data according to the local contract and write both required deliverables.
 
 ## Required Deliverables
 
-- `outputs/cleaned_customers.csv` (text) - Cleaned customer CSV output.
-- `outputs/data-cleaning-report.json` (json) - Cleaning summary report.
+- `outputs/cleaned_customers.csv` - Cleaned customer CSV output.
+- `outputs/data-cleaning-report.json` - Cleaning summary report.
 
-## Canonical Local Procedure
+## Workspace Materials
 
-Update the script, produce the deliverables, and run the validator.
-
-## Inputs To Inspect
-
+- `docs/problem-brief.md`
 - `data/raw_customers.csv`
 - `src/clean_data.py`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Remove exact duplicate customer rows.
-- Normalize emails to lowercase.
-- Drop rows with missing customer_id.
+- Preserve the CSV structure while applying the documented cleaning rules.
 - Do not modify the raw input file.
+- Treat files under `scripts/` as evaluator-side infrastructure.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The cleaned CSV has the expected row count and formatting.
-- The report reflects the input and output row counts.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The cleaned CSV reflects the documented row filtering and normalization rules.
+- The report artifact records the correct input and output row counts.

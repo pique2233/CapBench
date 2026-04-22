@@ -23,7 +23,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Combine the product, engineering, and operations inputs into a cross-team handoff package for the next shift.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

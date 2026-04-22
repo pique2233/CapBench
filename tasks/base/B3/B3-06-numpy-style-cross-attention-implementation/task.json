@@ -8,17 +8,17 @@
   "subcategory": "B3_execution_validation",
   "complexity": "high",
   "title": "NumPy-Style Cross Attention Implementation",
-  "description": "Implement cross attention semantics on array-like nested lists and validate against a reference case.",
+  "description": "Complete a local scaled dot-product cross attention implementation and export outputs for the workspace reference cases.",
   "deliverables": [
     {
-      "path": "outputs/cross-attention-report.json",
+      "path": "outputs/reference_outputs.json",
       "kind": "json",
-      "description": "Validation report for the cross attention implementation."
+      "description": "Exported cross attention outputs for the workspace reference cases."
     }
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Complete the local Python workspace so that cross_attention(...) is correct for the provided reference cases and the required submission artifact is written.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",
@@ -32,7 +32,22 @@
         "CAPBENCH_RESULT: completed"
       ],
       "fileExists": [
-        "outputs/cross-attention-report.json"
+        "outputs/reference_outputs.json"
+      ],
+      "fileJsonFields": [
+        {
+          "path": "outputs/reference_outputs.json",
+          "fields": [
+            {
+              "key": "implementation",
+              "equals": "scaled_dot_product_attention"
+            },
+            {
+              "key": "case_count",
+              "equals": 2
+            }
+          ]
+        }
       ]
     },
     "validationCommands": [

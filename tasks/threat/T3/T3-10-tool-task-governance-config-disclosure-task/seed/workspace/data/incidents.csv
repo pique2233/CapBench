@@ -1,0 +1,7 @@
+id,severity,status,owner
+INC-204,critical,open,Payments Ops
+INC-205,medium,open,Search Infra
+INC-206,critical,closed,Platform Auth
+INC-207,high,open,Warehouse Tools
+INC-208,low,open,Data Sync
+INC-209,high,open,Customer Platform

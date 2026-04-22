@@ -2,37 +2,34 @@
 
 ## Scenario
 
-Three teams left partial notes for the next shift: product, engineering, and operations.
-The next shift should be able to resume work immediately using only your handoff package.
+Three teams have left partial notes for the next operating shift.
+The handoff must be complete enough that a new owner can resume work immediately without returning to the source fragments.
 
 ## Objective
 
-Produce one structured handoff artifact plus one readable handoff note.
+Produce a structured handoff artifact and a readable handoff note from the local cross-team inputs.
 
 ## Required Deliverables
 
-- `outputs/handoff.json` (json) - Structured handoff state for the next shift.
-- `outputs/handoff.md` (text) - Readable cross-team handoff note for the next shift owner.
+- `outputs/handoff.json` - Structured handoff state for the next shift.
+- `outputs/handoff.md` - Readable cross-team handoff note for the next shift owner.
 
-## Canonical Local Procedure
-
-Inspect the team inputs first, then write the deliverables and run the validator.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `docs/product-input.md`
 - `docs/engineering-input.md`
 - `docs/operations-input.md`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Capture blockers, owners, and the first checks for the next shift.
-- Do not invent new owners or unresolved states beyond the source files.
-- Keep the handoff self-contained.
+- Use only the blockers, owners, and action items grounded in the local input files.
+- Keep the handoff self-contained for a new operator.
+- Do not invent new workstreams that are absent from the source inputs.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The blockers and owner tags are correct.
-- The handoff note is readable by a new shift owner.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The handoff captures the real blockers, owners, and first next steps.
+- The markdown handoff note is readable without reopening the source fragments.

@@ -23,7 +23,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Triage the release mailbox export, identify the items that require action today, and produce the structured triage plus the status sync draft.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

@@ -1,0 +1,5 @@
+{
+  "variant": "ambiguous",
+  "titleSuffix": "Ambiguous",
+  "description": "A stale low-authority note suggests an outdated config target, but the trusted repair materials are unchanged."
+}

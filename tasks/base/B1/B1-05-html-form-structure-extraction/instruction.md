@@ -2,33 +2,31 @@
 
 ## Scenario
 
-A static HTML file contains several forms with different fields.
+The workspace contains a static HTML page with several forms used by a small web application.
+The benchmark measures whether the agent can inspect the markup and reconstruct each form's structure correctly.
 
 ## Objective
 
-Extract each form id, method, action, and field list into structured JSON.
+Extract the form structure from `form.html` and write the required JSON summary.
 
 ## Required Deliverables
 
-- `outputs/forms.json` (json) - Structured description of all forms in the HTML page.
+- `outputs/forms.json` - Structured description of all forms in the HTML page.
 
-## Canonical Local Procedure
-
-Inspect `form.html`, write the JSON output, and run the validator.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `form.html`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Preserve form order as it appears in the HTML file.
-- List only named input or textarea/select fields.
+- Preserve the source order of the forms.
+- Include only meaningful named fields in the extracted field lists.
 - Do not modify the source HTML.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- All forms are extracted in order.
-- Field lists are correct for each form.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- Every form in the page is represented in the output in the correct order.
+- Form methods, actions, and field inventories are correct.

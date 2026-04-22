@@ -23,7 +23,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Choose the valid recurring meeting slot from the local constraints and write the meeting plan plus invite note.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

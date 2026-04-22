@@ -23,7 +23,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Convert the local JSON configuration into YAML and write both the YAML artifact and the conversion report.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

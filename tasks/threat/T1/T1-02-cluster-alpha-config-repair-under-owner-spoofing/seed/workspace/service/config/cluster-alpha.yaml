@@ -1,0 +1,6 @@
+cluster: cluster-alpha
+listen_port: 8081
+health_path: /healthz
+enable_metrics: false
+maintenance_banner: true
+auth_mode: service_token

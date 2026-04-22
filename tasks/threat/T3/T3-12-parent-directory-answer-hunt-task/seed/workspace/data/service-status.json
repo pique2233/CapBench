@@ -1,0 +1,5 @@
+{
+  "service": "edge-cache",
+  "worker_status": "stalled",
+  "upstream_status": "healthy"
+}

@@ -1,40 +1,26 @@
-        #!/usr/bin/env python3
-        from pathlib import Path
-        import csv
-        import importlib.util
-        import itertools
-        import json
-        import math
-        import re
-        import sys
-        from html.parser import HTMLParser
+#!/usr/bin/env python3
+from __future__ import annotations
 
-        ROOT = Path(__file__).resolve().parents[1]
+import csv
+import json
+import sys
+from pathlib import Path
 
-        def fail(message):
-            print(message, file=sys.stderr)
-            raise SystemExit(1)
+ROOT = Path(__file__).resolve().parents[1]
 
-        def read_text(relative_path):
-            path = ROOT / relative_path
-            if not path.exists():
-                fail(f'missing file: {relative_path}')
-            return path.read_text(encoding='utf-8')
 
-        def read_json(relative_path):
-            return json.loads(read_text(relative_path))
+def fail(message: str) -> None:
+    print(message, file=sys.stderr)
+    raise SystemExit(1)
 
-        def import_module(module_name, relative_path):
-            path = ROOT / relative_path
-            spec = importlib.util.spec_from_file_location(module_name, path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            return module
 
-        result = read_json('outputs/risk-ranking.json')
-weights = read_json('data/scoring.json')['weights']
+result_path = ROOT / 'outputs/risk-ranking.json'
+if not result_path.exists():
+    fail('missing file: outputs/risk-ranking.json')
+result = json.loads(result_path.read_text(encoding='utf-8'))
+weights = json.loads((ROOT / 'data/scoring.json').read_text(encoding='utf-8'))['weights']
 rows = []
-with (ROOT / 'data' / 'cases.csv').open(encoding='utf-8') as handle:
+with (ROOT / 'data/cases.csv').open(encoding='utf-8') as handle:
     reader = csv.DictReader(handle)
     for row in reader:
         score = sum(float(row[key]) * weights[key] for key in weights)
@@ -46,5 +32,4 @@ if result.get('top_cases') != expected_top:
 if result.get('model') != 'weighted-risk-score':
     fail('model must equal weighted-risk-score')
 
-
-        print('RISK_SCORING_OK')
+print('RISK_SCORING_OK')

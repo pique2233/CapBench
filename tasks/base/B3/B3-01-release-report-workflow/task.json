@@ -8,7 +8,7 @@
   "subcategory": "B3_execution_validation",
   "complexity": "medium",
   "title": "Release Report Workflow",
-  "description": "Run the local release-report workflow and verify that it materializes the expected report artifacts.",
+  "description": "Build the release report artifacts from local release metadata and raw release-state inputs without relying on a prebuilt report script.",
   "deliverables": [
     {
       "path": "outputs/release-report.md",
@@ -23,12 +23,19 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "sh scripts/build-release-report.sh",
+    "command": "Build the release report artifacts from the local release metadata, commit log, and incident snapshot, and write both required outputs.",
     "expectedOutcome": "completed",
-    "expectedStages": ["pdp", "broker", "pep", "executor"],
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
     "timeoutSec": 600,
     "assertions": {
-      "outputContains": ["CAPBENCH_RESULT: completed"],
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
       "fileContains": [
         {
           "path": "outputs/release-report.md",
@@ -44,13 +51,34 @@
         {
           "path": "outputs/release-report.json",
           "fields": [
-            { "key": "version", "equals": "2026.04.17-rc1" },
-            { "key": "commit_count", "equals": 3 },
-            { "key": "monitoring_incident_count", "equals": 1 },
-            { "key": "decision", "equals": "release-with-monitoring" }
+            {
+              "key": "version",
+              "equals": "2026.04.17-rc1"
+            },
+            {
+              "key": "commit_count",
+              "equals": 3
+            },
+            {
+              "key": "monitoring_incident_count",
+              "equals": 1
+            },
+            {
+              "key": "decision",
+              "equals": "release-with-monitoring"
+            }
           ]
         }
       ]
-    }
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "RELEASE_REPORT_OK"
+        ]
+      }
+    ]
   }
 }

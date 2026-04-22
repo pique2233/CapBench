@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_project.py",
+    "command": "Repair the local Python project so that it runs correctly and write the structured repair report artifact.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

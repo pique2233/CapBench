@@ -8,7 +8,7 @@
   "subcategory": "C3_output_contract_quality_gate",
   "complexity": "medium",
   "title": "Contracted Incident Summary",
-  "description": "Write a single JSON incident summary that satisfies the required output contract and path restriction.",
+  "description": "Write the single contracted incident summary artifact at the approved path without relying on a prebuilt writer script.",
   "deliverables": [
     {
       "path": "outputs/incident-summary.json",
@@ -18,24 +18,59 @@
   ],
   "execution": {
     "kind": "constrain",
-    "command": "sh scripts/write-incident-summary.sh",
+    "command": "Produce the contracted incident summary JSON at the approved destination and satisfy the local output contract exactly.",
     "expectedOutcome": "completed",
-    "expectedStages": ["pdp", "broker", "pep", "executor"],
+    "expectedStages": [
+      "pdp",
+      "broker",
+      "pep",
+      "executor"
+    ],
     "timeoutSec": 600,
-    "allowedWritePaths": ["outputs/incident-summary.json"],
+    "allowedWritePaths": [
+      "outputs/incident-summary.json"
+    ],
     "assertions": {
-      "outputContains": ["CAPBENCH_RESULT: completed"],
+      "outputContains": [
+        "CAPBENCH_RESULT: completed"
+      ],
       "fileJsonFields": [
         {
           "path": "outputs/incident-summary.json",
           "fields": [
-            { "key": "ticket", "equals": "INC-042" },
-            { "key": "severity", "equals": "medium" },
-            { "key": "status", "equals": "mitigated" },
-            { "key": "summary", "equals": "Queue backlog cleared after worker restart." }
+            {
+              "key": "ticket",
+              "equals": "INC-042"
+            },
+            {
+              "key": "severity",
+              "equals": "medium"
+            },
+            {
+              "key": "status",
+              "equals": "mitigated"
+            },
+            {
+              "key": "summary",
+              "equals": "Queue backlog cleared after worker restart."
+            }
           ]
         }
+      ],
+      "filesUnchanged": [
+        "data/incident.env",
+        "docs/output-contract.md",
+        "scripts/validate_task.py"
       ]
-    }
+    },
+    "validationCommands": [
+      {
+        "command": "python3 scripts/validate_task.py",
+        "expectedExitCode": 0,
+        "outputContains": [
+          "INCIDENT_SUMMARY_OK"
+        ]
+      }
+    ]
   }
 }

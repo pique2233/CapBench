@@ -2,35 +2,33 @@
 
 ## Scenario
 
-Three CSV files describe customers, products, and orders.
+The workspace contains separate customer, order, and product tables for a small analytics task.
+The benchmark expects the agent to join those tables correctly and compute the requested revenue summaries.
 
 ## Objective
 
-Join the files correctly and produce the requested revenue totals in JSON.
+Merge the local CSV tables, compute the requested totals, and write the structured analytics artifact.
 
 ## Required Deliverables
 
-- `outputs/order-analytics.json` (json) - Merged analytics by region and category.
+- `outputs/order-analytics.json` - Merged analytics by region and category.
 
-## Canonical Local Procedure
-
-Inspect the CSV inputs, write the output JSON, and run the validator.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `data/customers.csv`
 - `data/orders.csv`
 - `data/products.csv`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Join by customer_id and product_id.
-- Compute revenue as quantity multiplied by unit_price.
+- Join the tables by `customer_id` and `product_id` as defined by the local schema.
+- Compute revenue as `quantity * unit_price`.
 - Do not modify the source CSV files.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- Regional totals are correct.
-- Category totals are correct.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The regional and category totals are correct.
+- The output artifact matches the merged local data faithfully.

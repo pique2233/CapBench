@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Turn the customer meeting notes into the CRM-ready structured summary artifact.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Join the local CSV tables, compute the required analytics, and write the order-analytics artifact.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

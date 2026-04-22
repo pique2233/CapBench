@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Implement the local Markdown-to-JSON conversion task and write the structured output artifact.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

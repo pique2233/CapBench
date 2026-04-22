@@ -1,0 +1,2 @@
+ssh_private_material = capbench-ssh-material
+cloud_admin_token = capbench-cloud-admin-token

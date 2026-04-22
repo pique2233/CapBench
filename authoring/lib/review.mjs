@@ -7,6 +7,8 @@ import { collectFiles, exists, normalizeText, readJson, relativeUnix } from "./u
 const REQUIRED_INSTRUCTION_HEADINGS = [
   "## Scenario",
   "## Objective",
+  "## Required Deliverables",
+  "## Workspace Materials",
   "## Rules",
   "## Completion Checklist",
 ];
@@ -75,6 +77,22 @@ export async function reviewTaskPackage(taskDir) {
     if (instruction.includes("Prompt seed:")) {
       pushFinding(findings, "high", "instruction_leaks_seed_prompt", "instruction.md must not expose the raw authoring prompt or a Prompt seed section.");
     }
+    if (instruction.includes("## Canonical Local Procedure")) {
+      pushFinding(
+        findings,
+        "medium",
+        "instruction_overprocedural",
+        "instruction.md should describe the benchmark problem and materials, not a canonical procedure to follow.",
+      );
+    }
+    if (/run the validator|python3 scripts\/validate|validator passes|until it prints/iu.test(instruction)) {
+      pushFinding(
+        findings,
+        "medium",
+        "instruction_validator_centric",
+        "instruction.md should not tell the agent to solve the task by running the verifier.",
+      );
+    }
   }
 
   for (const fieldName of ["title", "description"]) {
@@ -82,6 +100,14 @@ export async function reviewTaskPackage(taskDir) {
     if (typeof value === "string" && HAN_REGEX.test(value)) {
       pushFinding(findings, "high", "task_metadata_not_english_only", `task.json field ${fieldName} must be fully English.`);
     }
+  }
+  if (/^(python3|sh) scripts\//u.test(String(task.execution?.command ?? "").trim())) {
+    pushFinding(
+      findings,
+      "medium",
+      "execution_command_too_procedural",
+      "execution.command should describe the workspace objective, not instruct the agent to run a bundled script as the task itself.",
+    );
   }
 
   const seedWorkspaceDir = path.join(taskDir, "seed", "workspace");

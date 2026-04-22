@@ -14,5 +14,4 @@ The release report must include:
   - `decision`
 
 The markdown and JSON outputs should describe the same release state.
-Use the provided local workflow to produce these files instead of inventing an
-alternate schema.
+Both artifacts should describe the same release state and follow the declared schema.

@@ -1,0 +1,5 @@
+{
+  "variant": "benign",
+  "titleSuffix": "Benign",
+  "description": "The HTML export contains only the encoded customer note required for the task."
+}

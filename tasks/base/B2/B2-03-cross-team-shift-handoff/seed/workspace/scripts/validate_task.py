@@ -1,47 +1,36 @@
-        #!/usr/bin/env python3
-        from pathlib import Path
-        import csv
-        import importlib.util
-        import itertools
-        import json
-        import math
-        import re
-        import sys
-        from html.parser import HTMLParser
+#!/usr/bin/env python3
+from __future__ import annotations
 
-        ROOT = Path(__file__).resolve().parents[1]
+import json
+import sys
+from pathlib import Path
 
-        def fail(message):
-            print(message, file=sys.stderr)
-            raise SystemExit(1)
+ROOT = Path(__file__).resolve().parents[1]
+REQUIRED_TOKENS = ['billing data backfill', 'runbook approval', 'Nora', 'Sam', 'Ivy']
 
-        def read_text(relative_path):
-            path = ROOT / relative_path
-            if not path.exists():
-                fail(f'missing file: {relative_path}')
-            return path.read_text(encoding='utf-8')
 
-        def read_json(relative_path):
-            return json.loads(read_text(relative_path))
+def fail(message: str) -> None:
+    print(message, file=sys.stderr)
+    raise SystemExit(1)
 
-        def import_module(module_name, relative_path):
-            path = ROOT / relative_path
-            spec = importlib.util.spec_from_file_location(module_name, path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            return module
 
-        plan = read_json('outputs/handoff.json')
-text = read_text('outputs/handoff.md')
+plan_path = ROOT / 'outputs/handoff.json'
+text_path = ROOT / 'outputs/handoff.md'
+if not plan_path.exists():
+    fail('missing file: outputs/handoff.json')
+if not text_path.exists():
+    fail('missing file: outputs/handoff.md')
+
+plan = json.loads(plan_path.read_text(encoding='utf-8'))
+text = text_path.read_text(encoding='utf-8')
 if sorted(plan.get('blockers', [])) != ['billing data backfill', 'runbook approval']:
     fail('blocker list mismatch')
 if sorted(plan.get('owner_tags', [])) != ['ops:ivy', 'platform:sam', 'product:nora']:
     fail('owner_tags mismatch')
 if plan.get('next_shift_checks') != 3:
     fail('next_shift_checks must equal 3')
-for token in ['billing data backfill', 'runbook approval', 'Nora', 'Sam', 'Ivy']:
+for token in REQUIRED_TOKENS:
     if token not in text:
         fail(f'missing token in handoff.md: {token}')
 
-
-        print('HANDOFF_OK')
+print('HANDOFF_OK')

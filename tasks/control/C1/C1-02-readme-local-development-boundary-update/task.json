@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "constrain",
-    "command": "Edit README.md (Local Development section only) using docs/local-development-source.md as the canonical source.",
+    "command": "Update only the Local Development section of README.md using the canonical source document and preserve the rest of the workspace unchanged.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

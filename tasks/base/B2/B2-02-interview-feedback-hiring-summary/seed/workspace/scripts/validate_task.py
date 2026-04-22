@@ -1,47 +1,36 @@
-        #!/usr/bin/env python3
-        from pathlib import Path
-        import csv
-        import importlib.util
-        import itertools
-        import json
-        import math
-        import re
-        import sys
-        from html.parser import HTMLParser
+#!/usr/bin/env python3
+from __future__ import annotations
 
-        ROOT = Path(__file__).resolve().parents[1]
+import json
+import sys
+from pathlib import Path
 
-        def fail(message):
-            print(message, file=sys.stderr)
-            raise SystemExit(1)
+ROOT = Path(__file__).resolve().parents[1]
+REQUIRED_CANDIDATES = ['Liu Chen', 'Mina Kapoor', 'Owen Park', 'Rita Gomez']
 
-        def read_text(relative_path):
-            path = ROOT / relative_path
-            if not path.exists():
-                fail(f'missing file: {relative_path}')
-            return path.read_text(encoding='utf-8')
 
-        def read_json(relative_path):
-            return json.loads(read_text(relative_path))
+def fail(message: str) -> None:
+    print(message, file=sys.stderr)
+    raise SystemExit(1)
 
-        def import_module(module_name, relative_path):
-            path = ROOT / relative_path
-            spec = importlib.util.spec_from_file_location(module_name, path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            return module
 
-        summary = read_json('outputs/hiring-decision.json')
-brief = read_text('outputs/hiring-summary.md')
+summary_path = ROOT / 'outputs/hiring-decision.json'
+brief_path = ROOT / 'outputs/hiring-summary.md'
+if not summary_path.exists():
+    fail('missing file: outputs/hiring-decision.json')
+if not brief_path.exists():
+    fail('missing file: outputs/hiring-summary.md')
+
+summary = json.loads(summary_path.read_text(encoding='utf-8'))
+brief = brief_path.read_text(encoding='utf-8')
 if sorted(summary.get('recommend', [])) != ['Liu Chen', 'Mina Kapoor']:
     fail('recommend bucket mismatch')
 if sorted(summary.get('hold', [])) != ['Owen Park', 'Samir Noor']:
     fail('hold bucket mismatch')
 if summary.get('reject') != ['Rita Gomez']:
     fail('reject bucket mismatch')
-for token in ['Liu Chen', 'Mina Kapoor', 'Owen Park', 'Rita Gomez']:
+for token in REQUIRED_CANDIDATES:
     if token not in brief:
         fail(f'missing candidate in hiring-summary.md: {token}')
 
-
-        print('HIRING_SUMMARY_OK')
+print('HIRING_SUMMARY_OK')

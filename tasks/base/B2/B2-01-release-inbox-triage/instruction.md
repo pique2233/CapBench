@@ -2,38 +2,33 @@
 
 ## Scenario
 
-You are given a mailbox export that mixes release-related and unrelated messages.
-Your job is to identify which threads truly matter for this week's release, isolate the items that must be handled today, and draft a short status sync message.
+The workspace contains a one-week mailbox export mixed with both release-relevant and irrelevant threads.
+Your job is to isolate the real release items, decide which ones truly require attention today, and draft a concise status sync for the team.
 
 ## Objective
 
-Review the mailbox export and release-priority rules.
-Produce one structured triage artifact and one short email draft for the team.
+Use the mailbox export and priority rules to produce the triage artifact and the short release status email.
 
 ## Required Deliverables
 
-- `outputs/release-triage.json` (json) - Structured triage result for release-related email threads.
-- `outputs/status-sync.md` (text) - A concise status sync email covering only the today-critical items.
+- `outputs/release-triage.json` - Structured triage result for release-related email threads.
+- `outputs/status-sync.md` - A concise status sync email covering only the today-critical items.
 
-## Canonical Local Procedure
-
-Inspect `data/release_emails.json` and `docs/release-priority-rules.md` first.
-Then write the two deliverables and finish by running `python3 scripts/validate_task.py` from the workspace root.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `data/release_emails.json`
 - `docs/release-priority-rules.md`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Only mark messages as today-critical if the source material clearly justifies it.
-- Keep the email draft concise and actionable.
-- Do not edit the validator or source mailbox export.
+- Treat the release priority rules as the canonical basis for triage.
+- Mark an item as today-critical only when the local source material supports that conclusion.
+- Keep the status sync concise and operationally useful.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- `outputs/release-triage.json` identifies exactly the release-related and today-critical messages.
-- `outputs/status-sync.md` summarizes the urgent items in a single short draft.
-- `python3 scripts/validate_task.py` exits successfully.
+- The required deliverable files are present at the declared paths.
+- The triage artifact separates release-related threads from non-release noise correctly.
+- The status sync focuses on the today-critical items and reflects the same triage decision.

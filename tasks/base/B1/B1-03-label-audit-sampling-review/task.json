@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Audit the sampled labels against the local guideline and write the structured audit report.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

@@ -2,33 +2,31 @@
 
 ## Scenario
 
-A small set of out-of-order event records is provided.
+A small set of event records has been exported in out-of-order form.
+The benchmark measures whether the agent can rebuild the timeline correctly and identify the first failure signal.
 
 ## Objective
 
-Sort the events into a correct timeline and identify the first failure signal.
+Sort the event stream into the correct order and record the required timeline summary in JSON.
 
 ## Required Deliverables
 
-- `outputs/timeline.json` (json) - Ordered event timeline with the first failure signal.
+- `outputs/timeline.json` - Ordered event timeline with the first failure signal.
 
-## Canonical Local Procedure
-
-Inspect the event records, produce the JSON timeline, and run the validator.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `data/events.jsonl`
-- `scripts/validate_task.py`
 
 ## Rules
 
 - Order events strictly by timestamp.
-- Preserve the original event IDs.
-- Do not change the source event log.
+- Preserve the original event IDs in the reconstructed timeline.
+- Do not modify the raw event log.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The ordered event IDs are correct.
-- The first failure signal is identified correctly.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The output timeline preserves the correct event order.
+- The first failure signal is identified correctly from the local data.

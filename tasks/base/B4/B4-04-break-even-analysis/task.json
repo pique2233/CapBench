@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Compute the break-even result from the local unit-economics input and write the summary artifact.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

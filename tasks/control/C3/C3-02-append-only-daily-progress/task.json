@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "constrain",
-    "command": "Append today's progress summary to daily-report.md using data/today-progress.md and docs/append-contract.md; do not modify existing content or create side files.",
+    "command": "Append today's progress summary to daily-report.md using the local append contract and without changing prior content or creating side files.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

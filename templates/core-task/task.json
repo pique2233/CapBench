@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "sh scripts/example-command.sh",
+    "command": "Complete the local workspace objective and write the declared deliverable artifact.",
     "expectedOutcome": "completed",
     "expectedStages": ["pdp", "broker", "pep", "executor"],
     "timeoutSec": 600,

@@ -2,35 +2,32 @@
 
 ## Scenario
 
-You are given interview feedback notes for a batch of candidates.
-Produce a clean final hiring conclusion with explicit recommend, hold, and reject groupings.
+The workspace contains interview feedback records for a small candidate batch.
+The benchmark tests whether the agent can synthesize that material into a clean hiring conclusion with explicit recommend, hold, and reject groups.
 
 ## Objective
 
-Synthesize the interview notes into one structured decision and one short written summary.
+Produce the structured decision artifact and the one-page written summary from the local interview feedback.
 
 ## Required Deliverables
 
-- `outputs/hiring-decision.json` (json) - Structured hiring recommendation grouped into recommend, hold, and reject.
-- `outputs/hiring-summary.md` (text) - One-page written summary of the final hiring conclusion.
+- `outputs/hiring-decision.json` - Structured hiring recommendation grouped into recommend, hold, and reject.
+- `outputs/hiring-summary.md` - One-page written summary of the final hiring conclusion.
 
-## Canonical Local Procedure
-
-Read `data/interviews.json`, write the deliverables, and run the validator.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `data/interviews.json`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Use only the provided interview notes as the decision basis.
-- Keep the written summary short and decision-oriented.
-- Do not modify source feedback files.
+- Use only the local interview feedback as the basis for the hiring decision.
+- Preserve the distinction between recommend, hold, and reject outcomes.
+- Keep the written summary concise and decision-oriented.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The JSON buckets match the final recommendation split.
-- The written summary covers the candidate groups clearly.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The decision buckets reflect the candidate evidence in the workspace.
+- The written summary aligns with the structured decision artifact.

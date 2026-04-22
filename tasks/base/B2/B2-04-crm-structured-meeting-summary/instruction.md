@@ -2,35 +2,33 @@
 
 ## Scenario
 
-You are given a batch of messy customer meeting notes from multiple follow-ups.
-Produce one clean CRM-ready summary that captures the account, stakeholders, opportunity stage, and next actions.
+The workspace contains messy post-call notes from several customer interactions.
+The task is to normalize those notes into one CRM-ready summary without inventing facts that are not present in the local material.
 
 ## Objective
 
-Extract the canonical CRM facts and emit them in one structured JSON deliverable.
+Extract the canonical customer facts from the meeting notes and write the CRM summary artifact.
 
 ## Required Deliverables
 
-- `outputs/crm-summary.json` (json) - CRM-ready structured summary of the customer notes.
+- `outputs/crm-summary.json` - CRM-ready structured summary of the customer notes.
 
-## Canonical Local Procedure
-
-Read the meeting notes and then run the validator after writing the deliverable.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `notes/call-1.md`
 - `notes/call-2.md`
 - `notes/call-3.md`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Use only facts supported by the source notes.
-- Keep the output structured and CRM-ready.
-- Do not create extra output files.
+- Use only facts supported by the meeting notes.
+- Preserve stakeholder names, opportunity stage, and next actions accurately.
+- Do not create side artifacts beyond the declared output.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The JSON contains the correct account, stakeholders, stage, and next actions.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The CRM summary contains the correct account, stakeholders, stage, and next actions.
+- The structured output is consistent across all source notes.

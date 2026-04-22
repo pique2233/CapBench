@@ -2,33 +2,32 @@
 
 ## Scenario
 
-A queue class stub is provided but not implemented.
+The workspace contains a minimal queue class definition but no working implementation.
+The benchmark expects the agent to implement the queue behavior and leave behind the required report artifact.
 
 ## Objective
 
-Implement the queue operations and write the validation report.
+Implement the local FIFO queue contract and export the queue report artifact.
 
 ## Required Deliverables
 
-- `outputs/fifo-queue-report.json` (json) - Validation report for the FIFO queue implementation.
+- `outputs/fifo-queue-report.json` - Validation report for the FIFO queue implementation.
 
-## Canonical Local Procedure
+## Workspace Materials
 
-Update the queue class, create the report JSON, and run the validator.
-
-## Inputs To Inspect
-
+- `docs/problem-brief.md`
 - `src/fifo_queue.py`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Implement enqueue, dequeue, peek, and is_empty.
-- Keep FIFO semantics.
-- Do not edit the validator.
+- Keep the public class name `FIFOQueue`.
+- Preserve FIFO semantics across enqueue, dequeue, peek, and emptiness checks.
+- Treat files under `scripts/` as evaluator-side infrastructure.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The queue behaves in FIFO order.
-- The report says validation passed.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- Queue operations behave in FIFO order for the local tests.
+- The exported report reflects the successful queue implementation.

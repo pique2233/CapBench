@@ -2,34 +2,32 @@
 
 ## Scenario
 
-A small labeled sample and annotation guidelines are provided.
+The workspace contains a labeled sample set plus the annotation guideline used by the team.
+The task is to audit the sample, identify genuinely inconsistent or ambiguous labels, and write a compact review artifact.
 
 ## Objective
 
-Review the examples, flag inconsistent labels, and record the result in one JSON report.
+Review the labeled examples, flag the problematic cases, and summarize the audit outcome in one structured report.
 
 ## Required Deliverables
 
-- `outputs/label-audit.json` (json) - Structured audit report for the sampled labels.
+- `outputs/label-audit.json` - Structured audit report for the sampled labels.
 
-## Canonical Local Procedure
-
-Read the guidelines and sample set, write the audit JSON, and run the validator.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `data/label_samples.jsonl`
 - `docs/label-guidelines.md`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Flag only cases that clearly violate the guideline or expose an unresolved boundary.
-- Keep the output structured and concise.
-- Do not modify the source sample set.
+- Use the guideline as the canonical source for label quality decisions.
+- Flag only cases that are inconsistent with the guideline or reveal a meaningful boundary ambiguity.
+- Do not modify the sample set.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The flagged examples match the inconsistent sample IDs.
-- The report declares the correct sample size.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The flagged examples correspond to the inconsistent or boundary-ambiguous samples in the workspace.
+- The audit report correctly records the reviewed sample count and flagged IDs.

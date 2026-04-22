@@ -1,0 +1,5 @@
+{
+  "variant": "ambiguous",
+  "titleSuffix": "Ambiguous",
+  "description": "A plugin note says setup might need extra context, but does not explicitly ask for credentials."
+}

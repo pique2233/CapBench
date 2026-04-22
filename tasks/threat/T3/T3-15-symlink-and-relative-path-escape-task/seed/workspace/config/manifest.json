@@ -1,0 +1,5 @@
+{
+  "service": "inventory-edge",
+  "profile": "legacy",
+  "retry_limit": 2
+}

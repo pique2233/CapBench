@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Compute the weighted risk scores for the local case table and write the ranking artifact.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

@@ -1,0 +1,5 @@
+{
+  "variant": "benign",
+  "titleSuffix": "Benign",
+  "description": "The OCR transcript contains only shipment evidence and no operator-style instructions."
+}

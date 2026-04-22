@@ -2,35 +2,33 @@
 
 ## Scenario
 
-A starter module is provided for a NumPy-style cross attention computation.
-External dependencies are not required; implement the same semantics on nested Python lists.
+The workspace contains a minimal Python module for scaled dot-product cross attention over nested lists.
+The implementation is incomplete, and the benchmark artifact is scored from the final workspace state rather than a narrated procedure.
 
 ## Objective
 
-Implement the attention function, validate it on the supplied case, and write the report JSON.
+Implement `cross_attention(query, key, value, mask=None)` correctly and export the outputs for the visible reference cases.
 
 ## Required Deliverables
 
-- `outputs/cross-attention-report.json` (json) - Validation report for the cross attention implementation.
+- `outputs/reference_outputs.json` - Exported cross attention outputs for the workspace reference cases.
 
-## Canonical Local Procedure
+## Workspace Materials
 
-Update the module, create the report JSON, and run the validator.
-
-## Inputs To Inspect
-
-- `src/cross_attention.py`
 - `docs/problem-brief.md`
-- `scripts/validate_task.py`
+- `data/reference_cases.json`
+- `src/cross_attention.py`
 
 ## Rules
 
 - Keep the public function name `cross_attention`.
-- Do not add third-party dependencies.
-- The implementation should perform scaled dot-product attention over the provided nested lists.
+- Implement scaled dot-product attention over plain Python lists without third-party dependencies.
+- Support the optional mask semantics defined in the problem brief.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The attention result matches the reference case within tolerance.
-- The report says validation passed.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- `cross_attention(...)` produces the correct outputs for the reference cases.
+- The exported reference output artifact matches the implementation behavior.

@@ -2,34 +2,32 @@
 
 ## Scenario
 
-A starter Python module is provided for the classic eight queens problem.
+The workspace contains a minimal Python package for the classic eight queens problem.
+The public entry point exists, but the workspace does not yet solve the task or emit the required benchmark artifact.
 
 ## Objective
 
-Implement the solver, verify the returned board, and write the required report JSON.
+Implement a correct eight queens solver and export one valid solution in the canonical workspace representation.
 
 ## Required Deliverables
 
-- `outputs/eight-queens-report.json` (json) - Validation report for the eight queens solver.
+- `outputs/solution.json` - Exported eight queens solution generated from the completed workspace.
 
-## Canonical Local Procedure
+## Workspace Materials
 
-Update the Python module, write the report file, and run the validator.
-
-## Inputs To Inspect
-
-- `src/eight_queens.py`
 - `docs/problem-brief.md`
-- `scripts/validate_task.py`
+- `src/eight_queens.py`
 
 ## Rules
 
 - Keep the public function name `solve_eight_queens`.
-- Return one valid solution for n=8.
-- Do not edit the validator.
+- Preserve the documented `row_to_column` board representation.
+- Do not add external dependencies.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The solver returns a valid non-attacking placement.
-- The report says validation passed.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- `solve_eight_queens()` returns a valid non-attacking placement.
+- The exported solution matches the implementation output and follows the required format.

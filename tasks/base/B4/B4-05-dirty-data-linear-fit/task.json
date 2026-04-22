@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Clean the local observation data, fit the line, and write the fit-result artifact.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

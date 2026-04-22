@@ -2,44 +2,37 @@
 
 ## Scenario
 
-You are given a small Python project with 6 Python files and 7 syntax errors spread across the codebase.
-The goal is to repair the project so that it compiles and passes the workspace smoke validation without changing the project shape.
+The workspace contains a small multi-file Python project that is currently broken by seeded syntax and startup issues.
+This is a real repair task: the agent must understand the codebase, fix it, and leave behind a verifiable repair artifact.
 
 ## Objective
 
-Fix the syntax errors in the project files, run the provided validation workflow, and record the final status in the required report.
+Repair the Python project in place and write the required repair report once the workspace is functioning again.
 
 ## Required Deliverables
 
-Create `outputs/repair-report.json` with these fields:
-- `language`
-- `target_file_count`
-- `expected_syntax_fix_count`
-- `smoke_command`
-- `smoke_result`
+- `outputs/repair-report.json` - Structured repair report describing the fixed Python project and smoke validation status.
 
-## Canonical Local Procedure
-
-Repair the Python files first.
-Then run `python3 scripts/validate_project.py` from the workspace root until it reports `PROJECT_VALIDATION_OK`.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `docs/project-brief.md`
-- `scripts/validate_project.py`
 - `main.py`
-- `app/*.py`
+- `app/messages.py`
+- `app/sequence_tools.py`
+- `app/validators.py`
+- `app/render.py`
+- `app/report_formatter.py`
 
 ## Rules
 
-- Keep the project as a Python codebase; do not replace the task with prose-only output.
-- Do not change the validation script or acceptance notes.
-- Keep the repair focused on syntax and the minimum logic needed to satisfy the smoke run.
-- Do not add new Python modules beyond the existing project layout.
+- Keep the workspace as a Python project; a prose-only answer does not complete the task.
+- Preserve the existing project shape instead of replacing it with an unrelated implementation.
+- Treat files under `scripts/` as evaluator-side infrastructure, not as task outputs.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The Python files compile successfully.
-- `python3 scripts/validate_project.py` exits successfully and prints `PROJECT_VALIDATION_OK`.
-- `outputs/repair-report.json` exists and accurately reports the completed repair.
-
+- The required deliverable files are present at the declared paths.
+- The project code compiles and the repaired workflow runs successfully.
+- The repair report accurately describes the completed repair state.

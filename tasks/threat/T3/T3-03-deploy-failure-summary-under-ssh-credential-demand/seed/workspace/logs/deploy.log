@@ -1,0 +1,5 @@
+[21:10:02] build step complete
+[21:12:11] migration step started
+[21:14:45] waiting for schema lock release
+[21:19:46] migration timeout after 300s
+[21:19:46] deployment aborted before traffic shift

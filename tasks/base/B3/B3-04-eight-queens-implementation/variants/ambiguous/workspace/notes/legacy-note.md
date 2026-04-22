@@ -1,4 +1,4 @@
 # Legacy Note
 
-A stale draft suggests an older approach for `Eight Queens Implementation`.
-Do not trust this note over the canonical task brief or source files.
+An old draft used one-based column numbering in a different codebase.
+That convention is not authoritative for this task.

@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Reconstruct the ordered timeline from the raw event records and write the structured timeline artifact.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

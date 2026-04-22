@@ -2,35 +2,32 @@
 
 ## Scenario
 
-You are given a small production planning problem with material and labor limits.
-Return the optimal product mix that maximizes total profit.
+The workspace contains a discrete production planning problem with material and labor limits.
+The benchmark expects the agent to solve the optimization problem and export the best feasible production plan.
 
 ## Objective
 
-Read the model inputs and emit the optimal production plan as structured JSON.
+Determine the optimal production mix from the local problem data and write the structured plan artifact.
 
 ## Required Deliverables
 
-- `outputs/production-plan.json` (json) - Optimal production allocation and profit summary.
+- `outputs/production-plan.json` - Optimal production allocation and profit summary.
 
-## Canonical Local Procedure
+## Workspace Materials
 
-Inspect the problem definition, solve it, write the output, and run the validator.
-
-## Inputs To Inspect
-
-- `data/problem.json`
 - `docs/problem-brief.md`
-- `scripts/validate_task.py`
+- `data/problem.json`
 
 ## Rules
 
-- Respect all stated resource constraints.
-- Return the optimal feasible plan, not just a heuristic answer.
-- Do not change the source inputs.
+- Respect the local resource constraints exactly as stated.
+- Return the optimal feasible plan rather than a heuristic guess.
+- Do not modify the source problem data.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The plan is feasible and optimal.
-- The reported profit matches the plan.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The exported plan is feasible under the local constraints.
+- The reported profit corresponds to the optimal plan.

@@ -2,35 +2,32 @@
 
 ## Scenario
 
-A noisy OCR dump is provided in the workspace.
-Recover the readable text and summarize the extraction result.
+The workspace contains a noisy OCR capture of a short receipt-like document.
+This benchmark measures whether the agent can recover the intended text and leave behind a clean, machine-readable result.
 
 ## Objective
 
-Extract the intended text content and produce both a cleaned text file and a short summary JSON.
+Reconstruct the readable document content from `data/receipt_ocr.txt` and produce both required artifacts.
 
 ## Required Deliverables
 
-- `outputs/extracted-text.txt` (text) - Cleaned text extracted from the OCR dump.
-- `outputs/ocr-summary.json` (json) - Short structured summary of the OCR extraction result.
+- `outputs/extracted-text.txt` - Cleaned text extracted from the OCR dump.
+- `outputs/ocr-summary.json` - Short structured summary of the OCR extraction result.
 
-## Canonical Local Procedure
-
-Inspect the OCR dump, write the two deliverables, and run the validator.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `data/receipt_ocr.txt`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Clean obvious OCR noise such as 0/O and 5/S mistakes where the intent is clear.
-- Preserve the original meaning of the document.
-- Do not alter the OCR source file.
+- Correct obvious OCR distortions only when the intended text is clear from the local evidence.
+- Preserve the meaning and line structure of the recovered document.
+- Do not modify the OCR source file.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The cleaned text contains the expected readable lines.
-- The summary JSON reports the correct document type and line count.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The cleaned transcription is readable and faithful to the source document.
+- The summary artifact reports the correct document type and line count.

@@ -18,7 +18,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Parse the local paper entries and write the structured metadata file for all records.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

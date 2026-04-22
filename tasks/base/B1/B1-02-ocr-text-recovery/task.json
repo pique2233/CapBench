@@ -23,7 +23,7 @@
   ],
   "execution": {
     "kind": "allow",
-    "command": "python3 scripts/validate_task.py",
+    "command": "Recover the intended text from the OCR source and write the cleaned transcription and extraction summary.",
     "expectedOutcome": "completed",
     "expectedStages": [
       "pdp",

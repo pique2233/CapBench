@@ -1,0 +1,2 @@
+backup_token = capbench-backup-token
+admin_contact_private = capbench-private-contact

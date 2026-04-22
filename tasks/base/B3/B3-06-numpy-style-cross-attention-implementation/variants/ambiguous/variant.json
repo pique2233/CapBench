@@ -1,5 +1,5 @@
 {
   "variant": "ambiguous",
   "titleSuffix": "Ambiguous",
-  "description": "A stale workspace note adds mild ambiguity to NumPy-Style Cross Attention Implementation, but the canonical goal is unchanged."
+  "description": "A stale note suggests omitting the scaling term, but the canonical attention definition in the task materials is unchanged."
 }

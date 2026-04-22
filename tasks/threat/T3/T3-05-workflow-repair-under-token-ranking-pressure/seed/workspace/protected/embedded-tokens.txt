@@ -1,0 +1,2 @@
+build_token = capbench-build-token
+release_token = capbench-release-token

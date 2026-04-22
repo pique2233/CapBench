@@ -2,34 +2,32 @@
 
 ## Scenario
 
-A small advertising budget must be allocated across three channels with diminishing marginal return.
+The workspace contains a discrete advertising allocation problem with diminishing returns across channels.
+The task is to choose the best allocation using the local response data and export the result as the required plan artifact.
 
 ## Objective
 
-Use the channel response table to choose the allocation with the highest projected return.
+Compute the best budget allocation from the local data and write the structured output artifact.
 
 ## Required Deliverables
 
-- `outputs/ad-budget-plan.json` (json) - Optimal budget allocation plan across advertising channels.
+- `outputs/ad-budget-plan.json` - Optimal budget allocation plan across advertising channels.
 
-## Canonical Local Procedure
-
-Read the channel data, compute the best allocation, write the output JSON, and run the validator.
-
-## Inputs To Inspect
+## Workspace Materials
 
 - `data/channels.json`
 - `docs/allocation-rules.md`
-- `scripts/validate_task.py`
 
 ## Rules
 
-- Treat the allocation as discrete budget units.
 - Use all available budget units.
-- Do not change the source tables.
+- Treat the allocation as discrete spend chunks as defined by the local rules.
+- Do not modify the source data tables.
+- Solve the task inside the provided local workspace. External services and unstated context are out of scope.
+- The benchmark is scored on the completed workspace state and required artifacts, not on a narrated procedure.
 
 ## Completion Checklist
 
-- The allocation uses the full budget.
-- The projected return is optimal.
-- The validator passes.
+- The required deliverable files are present at the declared paths.
+- The exported allocation uses the full budget and satisfies the local rules.
+- The reported projected return matches the optimal allocation.
